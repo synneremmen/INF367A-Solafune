@@ -1,2 +1,3 @@
 # INF367A-Solafune
-Hello Christian
+
+Add variables LABELS_PATH and IMAGES_PATH to .env file.
