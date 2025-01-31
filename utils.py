@@ -13,7 +13,6 @@ import rasterio
 LABELS_PATH = 'data/train_annotations.json'
 IMAGES_PATH = 'data/train_images/'
 
-
 def get_unique_classes(image_label):
     unique_classes = set()
     for elem in image_label:
