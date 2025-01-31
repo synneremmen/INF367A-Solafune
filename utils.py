@@ -1,17 +1,17 @@
 import os
 import json
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
+from matplotlib.patches import Polygon, Patch
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import rasterio
+from globals import class_mapping, LABELS_PATH, IMAGES_PATH, MASKED_IMAGES_PATH
 
 # to be implemented, but dotenv dont work for some reason
 # from dotenv import load_dotenv
 # load_dotenv()
 # LABELS_PATH = os.getenv('LABELS_PATH')
 # IMAGES_PATH = os.getenv('IMAGES_PATH')
-
-LABELS_PATH = 'data/train_annotations.json'
-IMAGES_PATH = 'data/train_images/'
 
 
 def get_unique_classes(image_label):
@@ -69,3 +69,25 @@ def plot_images(folder, amount=20, num_plots=2, band=5):
             else:
                 print(f'{filename} is not a .tif file.')
 
+
+def plot_masked_image(filename):
+    path = f"{MASKED_IMAGES_PATH}/{filename}"
+    src = rasterio.open(path)
+    mask_data = src.read(1)
+
+    colors = ['gainsboro', 'forestgreen', 'sienna', 'darkred', 'dodgerblue']
+    cmap = mcolors.ListedColormap(colors)
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(mask_data, cmap=cmap, vmin=0, vmax=len(class_mapping)-1)
+
+    patches = []
+    for label, class_val in class_mapping.items():
+        patch_color = cmap(class_val)
+        patches.append(Patch(color=patch_color, label=label))
+
+    ax.legend(handles=patches, bbox_to_anchor=(1, 1), loc='upper left')
+    ax.axis('off')
+    ax.set_title("Polygons with classes")
+    plt.show()
+    src.close()
