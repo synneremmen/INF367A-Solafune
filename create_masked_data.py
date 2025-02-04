@@ -4,7 +4,7 @@ from shapely.geometry import Polygon
 import os
 from rasterio.features import rasterize
 from rasterio.transform import Affine
-from globals import class_mapping, LABELS_PATH, IMAGES_PATH, MASKED_IMAGES_PATH
+from env import class_mapping, LABELS_PATH, IMAGES_PATH, MASKED_IMAGES_PATH
 
 
 os.makedirs(MASKED_IMAGES_PATH, exist_ok=True)
