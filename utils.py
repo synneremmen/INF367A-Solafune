@@ -1,18 +1,16 @@
 import os
+from dotenv import load_dotenv
 import json
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon, Patch
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import rasterio
-from globals import class_mapping, LABELS_PATH, IMAGES_PATH, MASKED_IMAGES_PATH
 
-# to be implemented, but dotenv dont work for some reason
-# from dotenv import load_dotenv
-# load_dotenv()
-# LABELS_PATH = os.getenv('LABELS_PATH')
-# IMAGES_PATH = os.getenv('IMAGES_PATH')
-
+load_dotenv()
+class_mapping = {'none':0, 'plantation':1, 'logging':2, 'mining':3, 'grassland_shrubland':4}
+LABELS_PATH = os.getenv("LABELS_PATH")
+IMAGES_PATH = os.getenv("IMAGES_PATH")
+MASKED_IMAGES_PATH = os.getenv("MASKED_IMAGES_PATH")
 
 def get_unique_classes(image_label):
     unique_classes = set()

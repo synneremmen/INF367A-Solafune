@@ -1,15 +1,16 @@
 # INF367A-Identifying Deforestation drivers
 
+This project is a submission to [Solafune competition](https://solafune.com/competitions/68ad4759-4686-4bb3-94b8-7063f755b43d?menu=about&tab=&topicId=a5e978e7-7759-4433-b1a5-063760451ff5).
+
+
+# Create .env
+
 Create an .env file with the following information:
 
 LABELS_PATH = path/to/labels
 IMAGES_PATH = path/to/images
 MASKED_IMAGES_PATH = path/to/masked/images
 
-CLASS_MAPPING = {'none':0, 'plantation':1, 'logging':2, 'mining':3, 'grassland_shrubland':4}
-
-
-This project is a submission to [Solafune competition](https://solafune.com/competitions/68ad4759-4686-4bb3-94b8-7063f755b43d?menu=about&tab=&topicId=a5e978e7-7759-4433-b1a5-063760451ff5).
 
 ## Project Description
 
