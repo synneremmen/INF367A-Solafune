@@ -1,23 +1,32 @@
 import os
 import shutil
+import subprocess
 
-source_dir = "data/masked_annotations/"
-dest_dir = "data/masked_annotations_subset/"
+source_dir_masked = "data/masked_annotations/"
+dest_dir_masked = "data/masked_annotations_subset/"
 
-# List of files to copy
-subset = [
-    "train_0.tif", "train_1.tif", "train_2.tif" "train_3.tif", "train_4.tif", 
-    "train_5.tif", "train_6.tif", "train_7.tif", "train_8.tif", 
-    "train_9.tif", "train_10.tif"
-]
+source_dir_train = "data/train_images/"
+dest_dir_train = "data/train_images_subset/"
 
-os.makedirs(dest_dir, exist_ok=True)
+if not os.path.exists(source_dir_train):
+    raise FileNotFoundError(f"Folder {source_dir_train} not found.")
 
-for file in os.listdir(source_dir):
-    if file in subset:
-        file_path = os.path.join(source_dir, file)
-        dest_path = os.path.join(dest_dir, file)
-        shutil.copy(file_path, dest_path)
-        print(f"Copied {file} to {dest_dir}")
+elif not os.path.exists(source_dir_masked):
+    subprocess.run(["python", "create_masked_data.py"], check=True)
 
-print("File copying completed.")
+else:
+
+    for source_dir, dest_dir in zip([source_dir_masked, source_dir_train], [dest_dir_masked, dest_dir_train]):
+        # List of files to copy
+        subset = [f"train_{i}.tif" for i in range(11)]
+
+        os.makedirs(dest_dir, exist_ok=True)
+
+        for file in os.listdir(source_dir):
+            if file in subset:
+                file_path = os.path.join(source_dir, file)
+                dest_path = os.path.join(dest_dir, file)
+                shutil.copy(file_path, dest_path)
+                print(f"Copied {file} to {dest_dir}")
+
+        print("Subset generated.")
