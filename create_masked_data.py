@@ -2,10 +2,15 @@ import rasterio
 import json
 from shapely.geometry import Polygon
 import os
+from dotenv import load_dotenv
 from rasterio.features import rasterize
 from rasterio.transform import Affine
-from env import class_mapping, LABELS_PATH, IMAGES_PATH, MASKED_IMAGES_PATH
 
+load_dotenv()
+class_mapping = {'none':0, 'plantation':1, 'logging':2, 'mining':3, 'grassland_shrubland':4}
+LABELS_PATH = os.getenv("LABELS_PATH")
+IMAGES_PATH = os.getenv("IMAGES_PATH")
+MASKED_IMAGES_PATH = os.getenv("MASKED_IMAGES_PATH")
 
 os.makedirs(MASKED_IMAGES_PATH, exist_ok=True)
 
