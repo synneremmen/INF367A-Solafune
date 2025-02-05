@@ -33,7 +33,7 @@ def load_images(subset=False):
     if subset:
         path = IMAGES_SUBSET_PATH
         if not os.path.exists(path):
-            subprocess.run(["python", "create_subset.py"], check=True)
+            subprocess.run(["python", "create_subsets.py"], check=True)
     else:
         path = IMAGES_PATH
     
@@ -54,7 +54,7 @@ def load_masked_images(subset=False):
     if subset:
         path = MASKED_IMAGES_SUBSET_PATH
         if not os.path.exists(MASKED_IMAGES_SUBSET_PATH):
-            subprocess.run(["python", "create_subset.py"], check=True)
+            subprocess.run(["python", "create_subsets.py"], check=True)
     else:
         path = MASKED_IMAGES_PATH
 
