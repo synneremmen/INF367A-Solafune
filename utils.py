@@ -5,7 +5,7 @@ from matplotlib.patches import Polygon, Patch
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import rasterio
-from globals import class_mapping, LABELS_PATH, IMAGES_PATH, MASKED_IMAGES_PATH
+from env import class_mapping, LABELS_PATH, IMAGES_PATH, MASKED_IMAGES_PATH
 
 # to be implemented, but dotenv dont work for some reason
 # from dotenv import load_dotenv
