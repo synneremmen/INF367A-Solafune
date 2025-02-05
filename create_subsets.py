@@ -13,7 +13,6 @@ subset = [
 
 os.makedirs(dest_dir, exist_ok=True)
 
-# Copy the files
 for file in os.listdir(source_dir):
     if file in subset:
         file_path = os.path.join(source_dir, file)
