@@ -33,7 +33,7 @@ def load_images():
         if file.endswith('.tif'):
             image_path = os.path.join(IMAGES_PATH, file)
             with rasterio.open(image_path) as src:
-                train_data.update({ file : {"image": src.read(), "profile": src.profile.copy(), "height": src.height, "width": src.width} })
+                train_data.update({ file : {"image": src.read(), "profile": src.profile} })
     return train_data
     
 def load_masked_images():
@@ -46,5 +46,5 @@ def load_masked_images():
         if file.endswith('.tif'):
             image_path = os.path.join(MASKED_IMAGES_PATH, file)
             with rasterio.open(image_path) as src:
-                masked_data.update({ file : {"image": src.read(), "profile": src.profile.copy(), "height": src.height, "width": src.width} })
+                masked_data.update({ file : {"image": src.read(), "profile": src.profile} })
     return masked_data
