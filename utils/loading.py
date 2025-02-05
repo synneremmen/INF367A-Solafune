@@ -20,6 +20,7 @@ def load_labels():
         labels = json.load(f)
         for image in labels["images"]:
             labels_data.update({image["file_name"] : image["annotations"]} )
+    print(f"Loaded {len(labels_data)} labels.")
     return labels_data
 
     
@@ -33,7 +34,8 @@ def load_images():
         if file.endswith('.tif'):
             image_path = os.path.join(IMAGES_PATH, file)
             with rasterio.open(image_path) as src:
-                train_data.update({ file : {"image": src.read(), "profile": src.profile.copy(), "height": src.height, "width": src.width} })
+                train_data.update({ file : {"image": src.read(), "profile": src.profile} })
+    print(f"Loaded {len(train_data)} images.")
     return train_data
     
 def load_masked_images():
@@ -46,5 +48,6 @@ def load_masked_images():
         if file.endswith('.tif'):
             image_path = os.path.join(MASKED_IMAGES_PATH, file)
             with rasterio.open(image_path) as src:
-                masked_data.update({ file : {"image": src.read(), "profile": src.profile.copy(), "height": src.height, "width": src.width} })
+                masked_data.update({ file : {"image": src.read(), "profile": src.profile} })
+    print(f"Loaded {len(masked_data)} masked images.")
     return masked_data
