@@ -19,7 +19,7 @@ def get_unique_classes(image_label):
     return unique_classes
 
 
-def plot_image(filename, num_plots, band=5):
+def plot_image(filename, num_plots=2, band=5):
     
     with open(LABELS_PATH, 'r') as file:
         labels = json.load(file)
@@ -38,7 +38,7 @@ def plot_image(filename, num_plots, band=5):
             plt.title(f'{filename} with class(es): {unique_classes}')
 
             for i in range(num_plots):
-                ax[i].imshow(src.read((band+i*2) % 13))
+                ax[i].imshow(src.read((band+i*2) % 12))
             
                 for polygon in image_label:
                     class_name = polygon['class']
