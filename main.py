@@ -1,4 +1,4 @@
-from utils.loading import load_labels, load_images, load_masked_images
+from utils.loading import load_images, load_masked_images
 from train.train import train
 from train.normalize import normalize
 import torch
@@ -6,7 +6,6 @@ from torch.utils.data import TensorDataset
 from models.simple_convnet import SimpleConvNet
 from torch.utils.data import DataLoader
 import torch.nn as nn
-import os
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.set_default_dtype(torch.double)
