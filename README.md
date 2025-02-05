@@ -37,7 +37,8 @@ matplotlib
 
 ## How to run project (ADD MORE DETAIL)
 
-Straigforward click run and see the magic happen.
+1. Run the create_masked_data.py to get images in the masked_annotations folder. 
+These tif files contains only one band of size 1024x1024. Each pixel in the data contains the class value (0-4, where 0 is none.)
 
 ## Submission and evaluation
 
