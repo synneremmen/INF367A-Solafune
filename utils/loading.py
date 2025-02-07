@@ -1,4 +1,5 @@
 import os
+import sys
 from dotenv import load_dotenv
 import json
 import rasterio
@@ -33,7 +34,8 @@ def load_images(subset=False):
     if subset:
         path = IMAGES_SUBSET_PATH
         if not os.path.exists(path):
-            subprocess.run(["python", "create_subsets.py"], check=True)
+            sys.path.append(os.path.abspath(".."))
+            subprocess.run(["python", os.path.join(os.path.dirname(__file__), "create_subsets.py")], check=True)
     else:
         path = IMAGES_PATH
     
@@ -49,12 +51,12 @@ def load_images(subset=False):
     
 def load_masked_images(subset=False):
     if not os.path.exists(MASKED_IMAGES_PATH):
-        subprocess.run(["python", "create_masked_data.py"], check=True)
-
+        subprocess.run(["python", os.path.join(os.path.dirname(__file__), "create_masked_data.py")], check=True)
+    
     if subset:
         path = MASKED_IMAGES_SUBSET_PATH
         if not os.path.exists(MASKED_IMAGES_SUBSET_PATH):
-            subprocess.run(["python", "create_subsets.py"], check=True)
+            subprocess.run(["python", os.path.join(os.path.dirname(__file__), "create_subsets.py")], check=True)
     else:
         path = MASKED_IMAGES_PATH
 

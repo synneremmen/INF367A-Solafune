@@ -10,8 +10,8 @@ torch.set_default_dtype(torch.double)
 
 def main():
     print("Loading data...")
-    batch_size = 10
     train_dataset = get_processed_data(subset=True)
+    batch_size = 10
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     print("Training model...")

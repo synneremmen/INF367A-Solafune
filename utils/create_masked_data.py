@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from rasterio.features import rasterize
 from rasterio.transform import Affine
-from utils.loading import load_labels, load_images
+from loading import load_labels, load_images
 
 load_dotenv()
 class_mapping = {'none':0, 'plantation':1, 'logging':2, 'mining':3, 'grassland_shrubland':4}
@@ -18,9 +18,9 @@ labels = load_labels()
 images = load_images()
 
 for image in images:
-    profile = image["profile"]
-    height, width = image["height"], image["width"]
     label = labels.get(image)
+    profile = images[image]["profile"]
+    height, width = profile["height"], profile["width"]
     polygons = []
 
     for elem in label:
@@ -45,9 +45,8 @@ for image in images:
 
     if not os.path.exists(MASKED_IMAGES_PATH):
             os.makedirs(MASKED_IMAGES_PATH)
-
+            
     mask_path = os.path.join(MASKED_IMAGES_PATH, image)
     with rasterio.open(mask_path, "w", **profile) as dst:
         dst.write(mask, 1)
-        
     print(f"Saved masked annotation {image} to {mask_path}")

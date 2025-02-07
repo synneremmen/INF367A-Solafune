@@ -1,18 +1,24 @@
 import os
 import shutil
 import subprocess
+from dotenv import load_dotenv
 
-source_dir_masked = "data/masked_annotations/"
-dest_dir_masked = "data/masked_annotations_subset/"
+load_dotenv()
+IMAGES_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.getenv("IMAGES_PATH")) 
+MASKED_IMAGES_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.getenv("MASKED_IMAGES_PATH")) 
+IMAGES_SUBSET_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.getenv("IMAGES_SUBSET_PATH")) 
+MASKED_IMAGES_SUBSET_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.getenv("MASKED_IMAGES_SUBSET_PATH")) 
 
-source_dir_train = "data/train_images/"
-dest_dir_train = "data/train_images_subset/"
+source_dir_masked = MASKED_IMAGES_PATH
+dest_dir_masked = MASKED_IMAGES_SUBSET_PATH
+source_dir_train = IMAGES_PATH
+dest_dir_train = IMAGES_SUBSET_PATH
 
 if not os.path.exists(source_dir_train):
     raise FileNotFoundError(f"Folder {source_dir_train} not found.")
 
 elif not os.path.exists(source_dir_masked):
-    subprocess.run(["python", "create_masked_data.py"], check=True)
+    subprocess.run(["python", "utils/create_masked_data.py"], check=True)
 
 else:
 
