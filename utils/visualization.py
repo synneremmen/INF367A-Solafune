@@ -39,11 +39,14 @@ def plot_image(filename, num_plots=2, band=5, labels=None):
         if not os.path.exists(IMAGES_PATH):
             raise FileNotFoundError("No images found.")
     
-        with rasterio.open( IMAGES_PATH + filename ) as src:
+        with rasterio.open(os.path.join(IMAGES_PATH, filename)) as src:
             _, ax = plt.subplots(1, num_plots, figsize=(15, 5))
 
             unique_classes = ', '.join(get_unique_classes(image_label))
             plt.suptitle(f'{filename} with class(es): {unique_classes}')
+
+            if num_plots == 1:
+                ax = [ax]  # Ensure ax is always a list for consistency
 
             for i in range(num_plots):
                 ax[i].imshow(src.read((band+i*2) % 12))
