@@ -19,23 +19,31 @@ def get_unique_classes(image_label):
     return unique_classes
 
 
-def plot_image(filename, num_plots=2, band=5):
+def plot_image(filename, num_plots=2, band=5, labels=None):
+    image_label = None
+
+    os.chdir(os.path.join(os.path.dirname(__file__), '..'))
+    if not os.path.exists(LABELS_PATH):
+        print(f"Cant find path: {os.getcwd()}")
+        raise FileNotFoundError("No labels found.")
     
     with open(LABELS_PATH, 'r') as file:
         labels = json.load(file)
 
-    image_label = None
     for image in labels["images"]:
         if image["file_name"] == filename:
             image_label = image["annotations"]
             break
     
     if image_label:
+        if not os.path.exists(IMAGES_PATH):
+            raise FileNotFoundError("No images found.")
+    
         with rasterio.open( IMAGES_PATH + filename ) as src:
-            _, ax = plt.subplots(1, num_plots, figsize=(15, 15))
+            _, ax = plt.subplots(1, num_plots, figsize=(15, 5))
 
             unique_classes = ', '.join(get_unique_classes(image_label))
-            plt.title(f'{filename} with class(es): {unique_classes}')
+            plt.suptitle(f'{filename} with class(es): {unique_classes}')
 
             for i in range(num_plots):
                 ax[i].imshow(src.read((band+i*2) % 12))
@@ -46,13 +54,11 @@ def plot_image(filename, num_plots=2, band=5):
                     
                     coords = [(segmentation[j], segmentation[j+1]) for j in range(0, len(segmentation), 2)]
                     polygon = Polygon(coords, edgecolor='red', lw=2, facecolor="red", alpha=0.3, label=class_name)
-                    ax[i].add_patch(polygon)
-            
+                    ax[i].add_patch(polygon)            
             
             plt.show()
     else:
         print(f'No annotations found for {filename}.')
-
 
 def plot_images(folder, amount=20, num_plots=2, band=5):
     count = 0
