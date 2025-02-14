@@ -14,7 +14,7 @@ def main():
     batch_size = 10
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-    print("Training model...")
+    print("Training model...\n\n")
     model = SimpleConvNet()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     loss_fn = nn.CrossEntropyLoss()
