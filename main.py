@@ -14,14 +14,20 @@ def main():
     print("Loading data...")
     dataset = get_processed_data(subset=True)
     train_loader, val_loader, test_loader = get_loader(dataset, batch_size=10)
-    print("Data loaded.\n\n", train_loader)
 
-    print("Training model...\n\n")
+    print()
+    print("Define types...")
     model = SimpleConvNet()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     loss_fn = nn.CrossEntropyLoss()
-    n_epochs = 20
+    n_epochs = 30
+
+    print()
+    print("Training model...")
     losses_train = train(n_epochs, optimizer, model, loss_fn, train_loader, device=DEVICE)
+
+    print()
+    print("Training completed. Training losses:\n")
     print(losses_train)
 
     print("Running evaluation...\n\n")
