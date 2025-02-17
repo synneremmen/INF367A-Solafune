@@ -11,6 +11,7 @@ Create an .env file with the following information:
 LABELS_PATH=path/to/labels
 IMAGES_PATH=path/to/images
 MASKED_IMAGES_PATH=path/to/masked/images
+EVAL_IMAGES_PATH=path/to/evaluation/images
 ```
 
 If training using a subset, these are also required:
@@ -18,6 +19,7 @@ If training using a subset, these are also required:
 ```plaintext
 IMAGES_SUBSET_PATH = path/to/subset/images
 MASKED_IMAGES_SUBSET_PATH = path/to/subset/images
+EVAL_IMAGES_SUBSET_PATH = path/to/evaluation/images/subset
 ```
 
 ## Project Description
