@@ -4,6 +4,7 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon, Patch
 import matplotlib.colors as mcolors
+import numpy as np
 import rasterio
 
 load_dotenv()
@@ -19,40 +20,66 @@ def get_unique_classes(image_label):
     return unique_classes
 
 
-def plot_image(filename, num_plots=2, band=5):
+def plot_image(filename, num_plots=2, band=5, no_nan=False, labels=None, polygons=True):
+    image_label = None
+
+    os.chdir(os.path.join(os.path.dirname(__file__), '..'))
+    if not os.path.exists(LABELS_PATH):
+        print(f"Cant find path: {os.getcwd()}")
+        raise FileNotFoundError("No labels found.")
     
     with open(LABELS_PATH, 'r') as file:
         labels = json.load(file)
 
-    image_label = None
     for image in labels["images"]:
         if image["file_name"] == filename:
             image_label = image["annotations"]
             break
     
     if image_label:
-        with rasterio.open( IMAGES_PATH + filename ) as src:
-            _, ax = plt.subplots(1, num_plots, figsize=(15, 15))
+        if not os.path.exists(IMAGES_PATH):
+            raise FileNotFoundError("No images found.")
+    
+        with rasterio.open(os.path.join(IMAGES_PATH, filename)) as src:
+            _, ax = plt.subplots(1, num_plots, figsize=(num_plots*5, 5))
 
             unique_classes = ', '.join(get_unique_classes(image_label))
-            plt.title(f'{filename} with class(es): {unique_classes}')
+            
+            if no_nan:
+                title = f'{filename} with class(es): {unique_classes} (wihtout nan values)'
+            else:
+                title = f'{filename} with class(es): {unique_classes}'
+            plt.suptitle(title)
+
+            if num_plots == 1:
+                ax = [ax]
 
             for i in range(num_plots):
-                ax[i].imshow(src.read((band+i*2) % 12))
-            
-                for polygon in image_label:
-                    class_name = polygon['class']
-                    segmentation = polygon['segmentation']
-                    
-                    coords = [(segmentation[j], segmentation[j+1]) for j in range(0, len(segmentation), 2)]
-                    polygon = Polygon(coords, edgecolor='red', lw=2, facecolor="red", alpha=0.3, label=class_name)
-                    ax[i].add_patch(polygon)
-            
-            
+                ax[i].set_title(f"Band {band+i}")
+                val = src.read(band+i)
+
+                if no_nan:
+                    cmap = plt.cm.viridis
+                    cmap.set_bad(color='yellow')
+                    val = np.ma.masked_invalid(val)
+                    cmap.set_bad(color='yellow')
+                    ax[i].imshow(val, cmap=cmap)
+                
+                else:
+                    ax[i].imshow(val)
+                
+                if polygons:
+                    for polygon in image_label:
+                        class_name = polygon['class']
+                        segmentation = polygon['segmentation']
+                        
+                        coords = [(segmentation[j], segmentation[j+1]) for j in range(0, len(segmentation), 2)]
+                        polygon = Polygon(coords, edgecolor='red', lw=2, facecolor="red", alpha=0.3, label=class_name)
+                        ax[i].add_patch(polygon)            
+        
             plt.show()
     else:
         print(f'No annotations found for {filename}.')
-
 
 def plot_images(folder, amount=20, num_plots=2, band=5):
     count = 0

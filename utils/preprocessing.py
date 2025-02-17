@@ -1,6 +1,6 @@
 from torch.utils.data import TensorDataset
 import torch
-from train.normalize import normalize
+from utils.normalize import normalize
 from utils.loading import load_images, load_masked_images
 
 def get_processed_data(subset=False):
