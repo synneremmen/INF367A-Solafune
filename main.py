@@ -2,17 +2,16 @@ from utils.preprocessing import get_processed_data
 from train.train import train
 import torch
 from models.simple_convnet import SimpleConvNet
-from torch.utils.data import DataLoader
 import torch.nn as nn
+from train.loader import get_loader
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.set_default_dtype(torch.double)
 
 def main():
     print("Loading data...")
-    train_dataset = get_processed_data(subset=True)
-    batch_size = 10
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    dataset = get_processed_data(subset=True)
+    train_loader, val_loader, test_loader = get_loader(dataset, batch_size=10)
 
     print("Training model...\n\n")
     model = SimpleConvNet()
