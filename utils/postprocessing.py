@@ -105,17 +105,16 @@ def save_json_to_folder(json_data, folder_path, filename="output.json"):
 
 def run_evaluation(model, test_loader):
     model_outputs = []
-    true_labels = []
-    for inputs, labels in test_loader:
-        outputs = model(inputs)
-        true_labels.append(labels)
+    for inputs in test_loader:
+        model.eval()
+
+        outputs = model(inputs[0])
         model_outputs.append(outputs)
     # You might then concatenate the outputs, depending on your needs.
     model_outputs = torch.cat(model_outputs, dim=0)
-    true_labels = torch.cat(true_labels, dim=0)
 
     # Convert the model outputs and true labels to polygons
-    model_polygons = outputs_to_polygons(model_outputs)
+    model_polygons = outputs_to_polygons(model_outputs.detach().numpy())
 
     # Convert to Json
     json_data = polygons_to_json(model_polygons, class_names)
