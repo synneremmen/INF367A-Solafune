@@ -103,12 +103,12 @@ def save_json_to_folder(json_data, folder_path, filename="output.json"):
     print(f"JSON saved to {file_path}")
 
 
-def run_evaluation(model, test_loader):
+def run_evaluation(model, test_loader, device):
     model_outputs = []
     for inputs in test_loader:
         model.eval()
-
-        outputs = model(inputs[0])
+        inputs_tensor = inputs[0].to(device)
+        outputs = model(inputs_tensor)
         model_outputs.append(outputs)
     # You might then concatenate the outputs, depending on your needs.
     model_outputs = torch.cat(model_outputs, dim=0)

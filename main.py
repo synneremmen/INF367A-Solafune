@@ -33,7 +33,7 @@ def main():
     print("Running evaluation...\n\n")
     eval_dataset = get_processed_evaluation_data(subset=True)
     eval_loader = DataLoader(eval_dataset, batch_size=10, shuffle=False)
-    run_evaluation(model, eval_loader)
+    run_evaluation(model, eval_loader, device=DEVICE)
 
 if __name__ == "__main__":
     main()
