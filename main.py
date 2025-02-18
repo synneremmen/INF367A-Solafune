@@ -15,8 +15,6 @@ def main():
     dataset = get_processed_data(subset=True)
     train_loader, val_loader, test_loader = get_loader(dataset, batch_size=10)
 
-    print()
-    print("Define types...")
     model = SimpleConvNet()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     loss_fn = nn.CrossEntropyLoss()
