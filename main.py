@@ -25,7 +25,7 @@ def main():
     losses_train = train(n_epochs, optimizer, model, loss_fn, train_loader, device=DEVICE)
 
     print()
-    print("Training completed. Training losses:\n")
+    print("Training completed. Training losses:")
     print(losses_train)
 
     print("Running evaluation...\n\n")
