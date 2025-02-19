@@ -55,3 +55,4 @@ tornado==6.4.2
 traitlets==5.14.3
 typing_extensions==4.12.2
 wcwidth==0.2.13
+scikit-image
