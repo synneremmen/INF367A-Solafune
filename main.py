@@ -17,8 +17,12 @@ def main():
     print("\n\nLoading data...\n\n")
     dataset = get_processed_data(subset=subset)
     train_loader, val_loader, test_loader = get_loader(dataset, batch_size=10)
+    
+    print("Size of training dataset: ", len(train_loader.dataset))
+    print("Size of validation dataset: ", len(val_loader.dataset))
+    print("Size of test dataset: ", len(test_loader.dataset))
 
-    model = SimpleConvNet() # UNet()
+    model = SimpleConvNet() # UNet() if you want to use the UNet model
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     loss_fn = nn.CrossEntropyLoss()
     n_epochs = 10
