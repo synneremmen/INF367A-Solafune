@@ -12,6 +12,8 @@ class_mapping = {'none':0, 'plantation':1, 'logging':2, 'mining':3, 'grassland_s
 LABELS_PATH = os.getenv("LABELS_PATH")
 IMAGES_PATH = os.getenv("IMAGES_PATH")
 MASKED_IMAGES_PATH = os.getenv("MASKED_IMAGES_PATH")
+EVAL_LABELS_PATH = os.getenv("EVAL_LABELS_PATH")
+EVAL_IMAGES_PATH = os.getenv("EVAL_IMAGES_PATH")
 
 def get_unique_classes(image_label):
     unique_classes = set()
@@ -20,27 +22,36 @@ def get_unique_classes(image_label):
     return unique_classes
 
 
-def plot_image(filename, num_plots=2, band=5, no_nan=False, labels=None, polygons=True):
+def plot_image(filename, num_plots=2, band=5, no_nan=False, labels=None, polygons=True, type="train"):
     image_label = None
 
+    if type == "train":
+        labels_path = LABELS_PATH
+        images_path = IMAGES_PATH
+    elif type == "eval":
+        labels_path = EVAL_LABELS_PATH
+        images_path = EVAL_IMAGES_PATH
+
     os.chdir(os.path.join(os.path.dirname(__file__), '..'))
-    if not os.path.exists(LABELS_PATH):
+    if not os.path.exists(labels_path):
         print(f"Cant find path: {os.getcwd()}")
         raise FileNotFoundError("No labels found.")
     
-    with open(LABELS_PATH, 'r') as file:
+    with open(labels_path, 'r') as file:
         labels = json.load(file)
+        print(labels)
 
     for image in labels["images"]:
         if image["file_name"] == filename:
+            print(f"Found {filename}")
             image_label = image["annotations"]
             break
     
     if image_label:
-        if not os.path.exists(IMAGES_PATH):
+        if not os.path.exists(images_path):
             raise FileNotFoundError("No images found.")
     
-        with rasterio.open(os.path.join(IMAGES_PATH, filename)) as src:
+        with rasterio.open(os.path.join(images_path, filename)) as src:
             _, ax = plt.subplots(1, num_plots, figsize=(num_plots*5, 5))
 
             unique_classes = ', '.join(get_unique_classes(image_label))
@@ -81,7 +92,7 @@ def plot_image(filename, num_plots=2, band=5, no_nan=False, labels=None, polygon
     else:
         print(f'No annotations found for {filename}.')
 
-def plot_images(folder, amount=20, num_plots=2, band=5):
+def plot_images(folder, type="train", amount=20, num_plots=2, band=5):
     count = 0
     for filename in os.listdir(folder):
         if count >= amount:
@@ -89,7 +100,7 @@ def plot_images(folder, amount=20, num_plots=2, band=5):
             break
         else:
             if filename.endswith('.tif') :
-                plot_image(filename, num_plots, band) 
+                plot_image(filename, num_plots=num_plots, band=band, type=type) 
                 count += 1
             else:
                 print(f'{filename} is not a .tif file.')
