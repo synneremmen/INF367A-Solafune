@@ -29,7 +29,7 @@ def load_labels():
     return labels_data
 
     
-def load_images(type="train", subset=False):    
+def load_images(subset=False, type="train"):    
 
     if type == "train":
         if subset:
@@ -47,6 +47,9 @@ def load_images(type="train", subset=False):
                 raise FileNotFoundError(f'Folder {path} not found. Please create a subset of the evaluation images.')
         else:
             path = EVAL_IMAGES_PATH
+        
+    else:
+        raise ValueError(f"Type {type} not recognized. Please choose either 'train' or 'eval'.")
 
     if not os.path.exists(path):
         raise FileNotFoundError(f'Folder {path} not found. Please ensure your .env variables are correct.')
