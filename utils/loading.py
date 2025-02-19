@@ -29,49 +29,37 @@ def load_labels():
     return labels_data
 
     
-def load_images(subset=False):
-    if not os.path.exists(IMAGES_PATH):
-        raise FileNotFoundError(f'Folder {IMAGES_PATH} not found.')
-    
-    if subset:
-        path = IMAGES_SUBSET_PATH
-        if not os.path.exists(path):
-            sys.path.append(os.path.abspath(".."))
-            subprocess.run(["python", os.path.join(os.path.dirname(__file__), "create_subsets.py")], check=True)
-    else:
-        path = IMAGES_PATH
-    
-    train_data = dict()
+def load_images(type="train", subset=False):    
+
+    if type == "train":
+        if subset:
+            path = IMAGES_SUBSET_PATH
+            if not os.path.exists(path):
+                sys.path.append(os.path.abspath(".."))
+                subprocess.run(["python", os.path.join(os.path.dirname(__file__), "create_subsets.py")], check=True)
+        else:
+            path = IMAGES_PATH
+
+    elif type == "eval":
+        if subset:
+            path = EVAL_IMAGES_SUBSET_PATH
+            if not os.path.exists(path):
+                raise FileNotFoundError(f'Folder {path} not found. Please create a subset of the evaluation images.')
+        else:
+            path = EVAL_IMAGES_PATH
+
+    if not os.path.exists(path):
+        raise FileNotFoundError(f'Folder {path} not found. Please ensure your .env variables are correct.')
+
+    data = dict()
 
     for file in os.listdir(path):
         if file.endswith('.tif'):
             image_path = os.path.join(path, file)
             with rasterio.open(image_path) as src:
-                train_data.update({ file : {"image": src.read(), "profile": src.profile} })
-    print(f"Loaded {len(train_data)} images.")
-    return train_data
-
-def load_evaluation_images(subset=False):
-    if not os.path.exists(EVAL_IMAGES_PATH):
-        raise FileNotFoundError(f'Folder {EVAL_IMAGES_PATH} not found.')
-    
-    if subset:
-        path = EVAL_IMAGES_SUBSET_PATH
-        if not os.path.exists(path):
-            sys.path.append(os.path.abspath(".."))
-            subprocess.run(["python", os.path.join(os.path.dirname(__file__), "create_subsets.py")], check=True)
-    else:
-        path = EVAL_IMAGES_PATH
-    
-    eval_data = dict()
-
-    for file in os.listdir(path):
-        if file.endswith('.tif'):
-            image_path = os.path.join(path, file)
-            with rasterio.open(image_path) as src:
-                eval_data.update({ file : {"image": src.read(), "profile": src.profile} })
-    print(f"Loaded {len(eval_data)} images.")
-    return eval_data
+                data.update({ file : {"image": src.read(), "profile": src.profile} })
+    print(f"Loaded {len(data)} images.")
+    return data
     
 def load_masked_images(subset=False):
     if not os.path.exists(MASKED_IMAGES_PATH):

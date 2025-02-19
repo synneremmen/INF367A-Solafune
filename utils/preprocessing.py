@@ -1,7 +1,7 @@
 from torch.utils.data import TensorDataset
 import torch
 from utils.normalize import normalize
-from utils.loading import load_images, load_masked_images, load_evaluation_images
+from utils.loading import load_images, load_masked_images
 
 def get_processed_data(subset=False):
     x_train_dict = load_images(subset=subset)
@@ -20,7 +20,7 @@ def get_processed_data(subset=False):
 
 
 def get_processed_evaluation_data(subset=False):
-    x_eval_dict = load_evaluation_images(subset=subset)
+    x_eval_dict = load_images(type="eval",subset=subset)
 
     x_eval = [torch.tensor(each['image']) for each in x_eval_dict.values()]
 
