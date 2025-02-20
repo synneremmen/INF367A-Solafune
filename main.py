@@ -12,12 +12,12 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.set_default_dtype(torch.double)
 
 def main():
-    subset = True
+    subset = False
 
     print("\n\nLoading data...\n\n")
     dataset = get_processed_data(subset=subset)
     train_loader, val_loader, test_loader = get_loader(dataset, batch_size=10)
-    
+
     print("Size of training dataset: ", len(train_loader.dataset))
     print("Size of validation dataset: ", len(val_loader.dataset))
     print("Size of test dataset: ", len(test_loader.dataset))
@@ -25,7 +25,7 @@ def main():
     model = SimpleConvNet() # UNet() if you want to use the UNet model
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     loss_fn = nn.CrossEntropyLoss()
-    n_epochs = 10
+    n_epochs = 30
 
     print("\n\nTraining model...\n\n")
     losses_train = train(n_epochs, optimizer, model, loss_fn, train_loader, device=DEVICE)
