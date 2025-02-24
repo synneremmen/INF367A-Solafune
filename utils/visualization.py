@@ -57,7 +57,7 @@ def plot_image(filename, num_plots=2, band=5, no_nan=False, labels=None, polygon
             unique_classes = ', '.join(get_unique_classes(image_label))
             
             if no_nan:
-                title = f'{filename} with class(es): {unique_classes} (wihtout nan values)'
+                title = f'{filename} with class(es): {unique_classes} with enhanced NaN values'
             else:
                 title = f'{filename} with class(es): {unique_classes}'
             plt.suptitle(title)
