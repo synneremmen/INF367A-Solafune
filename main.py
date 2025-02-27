@@ -16,7 +16,7 @@ torch.set_default_dtype(torch.double)
 MODEL_PATH = "models/saved_model.pth"
 
 def main():
-    subset = True
+    subset = False
 
     print("\n\nLoading data...\n\n")
     dataset = get_processed_data(subset=subset)
@@ -34,7 +34,7 @@ def main():
     else:
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
         loss_fn = nn.CrossEntropyLoss()
-        n_epochs = 10
+        n_epochs = 30
 
         print("\n\nTraining model...\n\n")
         losses_train = train(n_epochs, optimizer, model, loss_fn, train_loader, device=DEVICE)
@@ -48,6 +48,7 @@ def main():
     print("\n\nRunning evaluation...\n\n")
     eval_dataset = get_processed_evaluation_data(subset=subset)
     eval_loader = DataLoader(eval_dataset, batch_size=10, shuffle=False)
+    torch.cuda.empty_cache()
     run_evaluation(model, eval_loader, device=DEVICE)
 
 if __name__ == "__main__":

@@ -104,17 +104,23 @@ def save_json_to_folder(json_data, folder_path, filename="output.json"):
 
 
 def run_evaluation(model, test_loader, device):
+    model.to(device)  # Move model to the appropriate device
     model_outputs = []
-    for inputs in test_loader:
-        model.eval()
-        inputs_tensor = inputs[0].to(device)
-        outputs = model(inputs_tensor)
-        model_outputs.append(outputs)
+    model.eval()  # Set the model to evaluation mode
+    with torch.no_grad(): # Disable gradient calculation
+        for inputs in test_loader:
+            # model.eval()
+            inputs_tensor = inputs[0].to(device)
+            outputs = model(inputs_tensor)
+            model_outputs.append(outputs)
+            torch.cuda.empty_cache()  # Clear CUDA cache inside the loop
     # You might then concatenate the outputs, depending on your needs.
     model_outputs = torch.cat(model_outputs, dim=0)
 
     # Convert the model outputs and true labels to polygons
-    model_polygons = outputs_to_polygons(model_outputs.detach().numpy())
+    #model_polygons = outputs_to_polygons(model_outputs.detach().numpy())
+    #after
+    model_polygons = outputs_to_polygons(model_outputs.detach().cpu().numpy())
 
     # Convert to Json
     json_data = polygons_to_json(model_polygons, class_names)
