@@ -5,7 +5,7 @@ from models.simple_convnet import SimpleConvNet
 from models.UNet import UNet
 import torch.nn as nn
 from train.loader import get_loader
-from utils.postprocessing import run_evaluation
+from utils.evaluation import run_evaluation
 from torch.utils.data import DataLoader
 import os
 
