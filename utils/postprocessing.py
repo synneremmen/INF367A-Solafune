@@ -32,29 +32,43 @@ def outputs_to_polygons(outputs, min_area=10, threshold=0.5):
         
     return polygons
 
-def labels_to_polygons(true_labels):
-    # Comes in on shape (B, H, W)
+def labels_to_polygons(loader, device="cpu"):
     polygons = []
-    for label in range(true_labels.shape[0]):
-        label = true_labels[label, :, :] # Shape (H, W)
-        polygons_by_class = {}
-        
-        for class_idx in range(1,5):
-            mask = (label == class_idx).astype(np.uint8)
-            contours = measure.find_contours(mask)
-            class_polygons = []
-            for contour in contours:
-                
-                # Convert (row, col) to (x, y) for Shapely.
-                poly = Polygon([(pt[1], pt[0]) for pt in contour])
-                class_polygons.append(poly)
-            polygons_by_class[class_idx] = class_polygons
-        polygons.append(polygons_by_class)
-        
+    
+    with torch.inference_mode():
+        for batch in loader:
+            # Assuming labels are in batch[1], modify this if needed
+            true_labels = batch[1].to(device)  # Move to the correct device
+
+            # Ensure labels are detached from computation graph and converted to numpy
+            true_labels = true_labels.cpu().numpy()  # Shape (B, H, W)
+
+            for i in range(true_labels.shape[0]):
+                label = true_labels[i, :, :]  # Shape (H, W)
+                polygons_by_class = {}
+
+                for class_idx in range(1, 5):  # Assuming class indices range from 1 to 4
+                    mask = (label == class_idx).astype(np.uint8)
+                    contours = measure.find_contours(mask, 0.5)  # 0.5 threshold for contour detection
+                    
+                    class_polygons = []
+                    for contour in contours:
+                        if len(contour) < 4:
+                            continue  # Ignore very small contours
+
+                        # Convert (row, col) to (x, y) for Shapely
+                        poly = Polygon([(pt[1], pt[0]) for pt in contour])
+                        if poly.is_valid:
+                            class_polygons.append(poly)
+
+                    polygons_by_class[class_idx] = class_polygons
+                polygons.append(polygons_by_class)
+    
     return polygons
 
 
-def polygons_to_json(polygons_by_class, class_names, file_name="evaluation"):
+
+def polygons_to_json(polygons_by_class, file_name="evaluation"):
 
     json_dict = {
         "images": [
@@ -101,22 +115,3 @@ def save_json_to_folder(json_data, folder_path, filename="output.json"):
         json.dump(json_data, f, indent=4)
     
     print(f"JSON saved to {file_path}")
-
-
-def run_evaluation(model, test_loader, device):
-    model.eval()
-    with torch.inference_mode():
-        model_outputs = []
-        for inputs in test_loader:
-            inputs_tensor = inputs[0].to(device)
-            outputs = model(inputs_tensor)
-            model_outputs.append(outputs)
-    # You might then concatenate the outputs, depending on your needs.
-    model_outputs = torch.cat(model_outputs, dim=0)
-
-    # Convert the model outputs and true labels to polygons
-    model_polygons = outputs_to_polygons(model_outputs.detach().numpy())
-
-    # Convert to Json
-    json_data = polygons_to_json(model_polygons, class_names)
-    save_json_to_folder(json_data, "./data/predictions")

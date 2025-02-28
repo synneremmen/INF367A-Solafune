@@ -20,7 +20,7 @@ class SimpleConvNet(nn.Module):
         # Decoder: upsample from 256x256 back to 1024x1024
         self.up1 = nn.ConvTranspose2d(in_channels=64, out_channels=32, 
                                       kernel_size=2, stride=2)  # 256 -> 512
-        self.up2 = nn.ConvTranspose2d(in_channels=32, out_channels=5,  # output 5 channels for 5 classes
+        self.up2 = nn.ConvTranspose2d(in_channels=32, out_channels=5,  # output 5 channels for 4 classes
                                       kernel_size=2, stride=2)  # 512 -> 1024
         
     

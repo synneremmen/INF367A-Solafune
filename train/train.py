@@ -1,9 +1,11 @@
 import torch
+import solafune_tools.metrics as metrics
 
 def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=None):
 
     n_train_batch = len(train_loader)
     losses_train = []
+    scores_train = []
     if val_loader is not None:
         n_val_batch = len(val_loader)
         losses_val = []
