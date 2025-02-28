@@ -1,5 +1,5 @@
 import torch
-import solafune_tools.metrics as metrics
+import datetime
 
 def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=None):
 
@@ -45,9 +45,9 @@ def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=
 
         if epoch == 1 or epoch % 5 == 0:
             print(f'--------- Epoch: {epoch} ---------')
-            print('Training loss {:.5f}'.format(loss_train / n_train_batch))
+            print('Training loss {:.5f} at {}'.format(loss_train / n_train_batch, datetime.datetime.now()))
             if val_loader is not None:
-                print('Validation loss {:.5f}'.format(loss_val / n_val_batch))
+                print('Validation loss {:.5f} at {}'.format(loss_val / n_val_batch, datetime.datetime.now()))
             print()
 
     return losses_train#, losses_val
