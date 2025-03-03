@@ -1,22 +1,29 @@
 import solafune_tools.metrics as metrics
 import torch
-from utils.postprocessing import outputs_to_polygons, polygons_to_json
+from utils.postprocessing import outputs_to_polygons, polygons_to_json , save_json_to_folder
 import numpy as np
 
 class_names = ['plantation', 'logging', 'mining', 'grassland_shrubland']
 
 def run_evaluation(model, loader, device):
     model.to(device) # Ensure model is on the correct device
+    model_outputs = []  # Store model outputs
     model.eval()
     with torch.inference_mode():
-        model_outputs = []
+        # model_outputs = []
         for inputs in loader:
             inputs_tensor = inputs[0].to(device)
             outputs = model(inputs_tensor)
             model_outputs.append(outputs)
 
     model_outputs = torch.cat(model_outputs, dim=0)
-    return outputs_to_polygons(model_outputs.detach().cpu().numpy())
+    # return outputs_to_polygons(model_outputs.detach().cpu().numpy())
+
+    model_polygons = outputs_to_polygons(model_outputs.detach().cpu().numpy())
+
+    # Convert to Json
+    json_data = polygons_to_json(model_polygons)
+    save_json_to_folder(json_data, "./data/predictions")
 
 def f1_from_polygons(pred_polygons_list, gt_polygons_list, iou_threshold=0.5):
     print("Length of pred and gt polygons:")
