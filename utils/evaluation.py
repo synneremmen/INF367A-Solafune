@@ -6,6 +6,7 @@ import numpy as np
 class_names = ['plantation', 'logging', 'mining', 'grassland_shrubland']
 
 def run_evaluation(model, loader, device):
+    model.to(device) # Ensure model is on the correct device
     model.eval()
     with torch.inference_mode():
         model_outputs = []
@@ -15,7 +16,7 @@ def run_evaluation(model, loader, device):
             model_outputs.append(outputs)
 
     model_outputs = torch.cat(model_outputs, dim=0)
-    return outputs_to_polygons(model_outputs.detach().numpy())
+    return outputs_to_polygons(model_outputs.detach().cpu().numpy())
 
 def f1_from_polygons(pred_polygons_list, gt_polygons_list, iou_threshold=0.5):
     print("Length of pred and gt polygons:")
