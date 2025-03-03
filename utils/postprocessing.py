@@ -8,7 +8,7 @@ import json
 
 class_names = ['plantation', 'logging', 'mining', 'grassland_shrubland']
 
-def outputs_to_polygons(outputs, min_area=10, threshold=0.5):
+def outputs_to_polygons(outputs, min_area=100, threshold=0.5):
     # Comes in the shape (B, C, H, W)
     polygons = []
     for i in range(outputs.shape[0]):
