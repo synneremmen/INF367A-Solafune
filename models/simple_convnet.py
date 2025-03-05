@@ -32,28 +32,8 @@ class SimpleConvNet(nn.Module):
         x = self.up2(x)      # [batch, 5, 1024, 1024]
         return x
 
-"""
-To calculate the number of parameters in the SimpleConvNet model, we need to consider the parameters in each layer of the network. Here's a breakdown of the parameters for each layer:
+# model = SimpleConvNet()
+# total_params = sum(p.numel() for p in model.parameters())
+# print(f'Total number of parameters: {total_params}')
 
-First Convolutional Layer (self.down1):
-
-nn.Conv2d(in_channels=12, out_channels=32, kernel_size=3, padding=1)
-Number of parameters: ( (3 \times 3 \times 12 \times 32) + 32 = 3488 )
-Second Convolutional Layer (self.down2):
-
-nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)
-Number of parameters: ( (3 \times 3 \times 32 \times 64) + 64 = 18496 )
-First Transposed Convolutional Layer (self.up1):
-
-nn.ConvTranspose2d(in_channels=64, out_channels=32, kernel_size=2, stride=2)
-Number of parameters: ( (2 \times 2 \times 32 \times 64) + 32 = 16416 )
-Second Transposed Convolutional Layer (self.up2):
-
-nn.ConvTranspose2d(in_channels=32, out_channels=5, kernel_size=2, stride=2)
-Number of parameters: ( (2 \times 2 \times 5 \times 32) + 5 = 1285 )
-Now, summing up all the parameters:
-
-[ 3488 + 18496 + 16416 + 1285 = 39685 ]
-
-So, the SimpleConvNet model has a total of 39,685 parameters.
-"""
+# Params: 30 853

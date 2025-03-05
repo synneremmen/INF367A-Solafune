@@ -89,49 +89,8 @@ class UNet(nn.Module):
         x = self.out(x) # får se om vi trenger eller kaster denne
         return x # [batch, 5, 1024, 1024]
     
-"""
-To calculate the number of parameters in the UNet model, we need to sum up the parameters of each layer in the model. Here's a step-by-step breakdown:
+# model = UNet()
+# total_params = sum(p.numel() for p in model.parameters())
+# print(f'Total number of parameters: {total_params}')
 
-Encoder Layers:
-
-encoder(12, 32):
-Conv2d: (12 * 32 * 3 * 3) + 32 = 3488
-Conv2d: (32 * 32 * 3 * 3) + 32 = 9248
-encoder(32, 64):
-Conv2d: (32 * 64 * 3 * 3) + 64 = 18496
-Conv2d: (64 * 64 * 3 * 3) + 64 = 36928
-encoder(64, 128):
-Conv2d: (64 * 128 * 3 * 3) + 128 = 73856
-Conv2d: (128 * 128 * 3 * 3) + 128 = 147584
-encoder(128, 256):
-Conv2d: (128 * 256 * 3 * 3) + 256 = 295168
-Conv2d: (256 * 256 * 3 * 3) + 256 = 590080
-Middle Layers:
-
-Conv2d: (256 * 512 * 3 * 3) + 512 = 1179648
-Conv2d: (512 * 256 * 3 * 3) + 256 = 1179904
-
-Decoder Layers:
-
-decoder(256, 128):
-ConvTranspose2d: (256 * 128 * 2 * 2) + 128 = 131200
-Conv2d: (384 * 256 * 3 * 3) + 256 = 884992
-Conv2d: (256 * 128 * 3 * 3) + 128 = 295040
-decoder(128, 64):
-ConvTranspose2d: (128 * 64 * 2 * 2) + 64 = 32832
-Conv2d: (192 * 128 * 3 * 3) + 128 = 221312
-Conv2d: (128 * 64 * 3 * 3) + 64 = 73792
-decoder(64, 32):
-ConvTranspose2d: (64 * 32 * 2 * 2) + 32 = 8224
-Conv2d: (96 * 64 * 3 * 3) + 64 = 55360
-Conv2d: (64 * 32 * 3 * 3) + 32 = 18464
-decoder(32, 12):
-ConvTranspose2d: (32 * 12 * 2 * 2) + 12 = 3084
-Conv2d: (44 * 32 * 3 * 3) + 32 = 12736
-Conv2d: (32 * 12 * 3 * 3) + 12 = 3468
-
-Output Layer:
-Conv2d: (12 * 5 * 3 * 3) + 5 = 650
-
-This gives a total of 5,852,286 parameters in the UNet model.
-"""
+# Params: 5274393
