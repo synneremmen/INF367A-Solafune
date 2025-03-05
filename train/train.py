@@ -1,5 +1,6 @@
 import torch
 import datetime
+from tqdm import trange
 
 def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=None):
 
@@ -14,7 +15,7 @@ def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=
     optimizer.zero_grad()
     model = model.to(device)
     
-    for epoch in range(1, n_epochs + 1):
+    for epoch in trange(1, n_epochs + 1):
         loss_train = 0.0
         loss_val = 0.0
 
