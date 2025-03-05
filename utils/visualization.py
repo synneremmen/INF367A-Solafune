@@ -39,12 +39,11 @@ def plot_image(filename, num_plots=2, band=5, no_nan=False, labels=None, polygon
     
     with open(labels_path, 'r') as file:
         labels = json.load(file)
-        print(labels)
 
     for image in labels["images"]:
         if image["file_name"] == filename:
             print(f"Found {filename}")
-            image_label = image["annotations"]
+            image_label = image["annotations"] 
             break
     
     if image_label:
@@ -100,6 +99,7 @@ def plot_images(folder, type="train", amount=20, num_plots=2, band=5):
             break
         else:
             if filename.endswith('.tif') :
+                print(f"Plotting {filename}")
                 plot_image(filename, num_plots=num_plots, band=band, type=type) 
                 count += 1
             else:
