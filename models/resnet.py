@@ -11,6 +11,16 @@ class UNetResNet18(nn.Module):
         # if we want to freeze all layers
         # for param in self.encoder.parameters():
         #    param.requires_grad = False
+
+        # Freeze early layers
+        for param in self.encoder.conv1.parameters():
+            param.requires_grad = False  # Freeze initial conv layer
+
+        for param in self.encoder.bn1.parameters():
+            param.requires_grad = False  # Freeze first batch norm
+
+        for param in self.encoder.layer1.parameters():
+            param.requires_grad = False  # Freeze first ResNet block
         
         # Modify first conv layer to accept 12 input channels
         self.encoder.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=1, padding=3, bias=False)
@@ -30,7 +40,7 @@ class UNetResNet18(nn.Module):
         #self.conv5 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
         
         # Final segmentation layer
-        self.final_conv = nn.Conv2d(16, num_classes, kernel_size=1)
+        self.final_conv = nn.Conv2d(32, num_classes, kernel_size=1)     # 16 -> 32
         
     def forward(self, x):
         # Encoder

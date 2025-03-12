@@ -2,7 +2,7 @@ import torch
 import datetime
 from tqdm import trange
 
-def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=None):
+def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=None, scheduler=None):
     n_train_batch = len(train_loader)
     losses_train = []
     scores_train = []
@@ -56,11 +56,16 @@ def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=
 
                 losses_val.append(loss_val / n_val_batch)
 
-        if epoch == 1 or epoch % 5 == 0:
-            print(f'--------- Epoch: {epoch} ---------')
-            print('Training loss {:.5f} at {}'.format(loss_train / n_train_batch, datetime.datetime.now()))
-            if val_loader is not None:
-                print('Validation loss {:.5f} at {}'.format(loss_val / n_val_batch, datetime.datetime.now()))
-            print()
+        #   if epoch == 1 or epoch % 5 == 0:
+        # print for every epoch
+        print(f'--------- Epoch: {epoch} ---------')
+        print('Training loss {:.5f} at {}'.format(loss_train / n_train_batch, datetime.datetime.now()))
+        if val_loader is not None:
+            print('Validation loss {:.5f} at {}'.format(loss_val / n_val_batch, datetime.datetime.now()))
+        print()
+        if scheduler:
+            scheduler.step()
+            print(f'Learning rate updated: {optimizer.param_groups[0]["lr"]:.6f}')
+        print()
 
     return losses_train#, losses_val
