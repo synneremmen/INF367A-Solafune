@@ -24,7 +24,7 @@ else:
 
     for source_dir, dest_dir in zip([source_dir_masked, source_dir_train], [dest_dir_masked, dest_dir_train]):
         # List of files to copy
-        subset = [f"train_{i}.tif" for i in range(11)]
+        subset = [f"train_{i}.tif" for i in range(30)]
 
         os.makedirs(dest_dir, exist_ok=True)
 
