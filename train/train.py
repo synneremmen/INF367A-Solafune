@@ -3,27 +3,29 @@ import datetime
 from tqdm import trange
 
 def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=None):
-
     n_train_batch = len(train_loader)
     losses_train = []
     scores_train = []
+
     if val_loader is not None:
         n_val_batch = len(val_loader)
         losses_val = []
 
-    model.train()
-    optimizer.zero_grad()
+    # model.train()
+    # optimizer.zero_grad()
+
     model = model.to(device)
     
     for epoch in trange(1, n_epochs + 1):
         loss_train = 0.0
         loss_val = 0.0
 
+        model.train()
         for imgs, labels in train_loader:
             imgs = imgs.to(device)
             labels = labels.to(device)
-            model.train()
 
+            optimizer.zero_grad()   # new
             outputs = model(imgs)
             loss = loss_fn(outputs, labels)
             loss.backward()
@@ -31,16 +33,26 @@ def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=
             optimizer.zero_grad()
 
             loss_train += loss.item()
+
+            del imgs, labels, outputs, loss  # Clear memory, new
+            torch.cuda.empty_cache()    # Clear cache
+
         losses_train.append(loss_train / n_train_batch)
 
         if val_loader is not None:
+            model.eval()
             with torch.no_grad():
                 for imgs, labels in val_loader:
-                    model.eval()
+                    # model.eval()
+                    imgs = imgs.to(device)
+                    labels = labels.to(device)
 
                     outputs = model(imgs)
                     loss = loss_fn(outputs, labels)
                     loss_val += loss.item()
+
+                    del imgs, labels, outputs, loss  # Clear memory, new
+                    torch.cuda.empty_cache()   # Clear cache
 
                 losses_val.append(loss_val / n_val_batch)
 

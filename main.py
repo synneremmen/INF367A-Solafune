@@ -4,7 +4,7 @@ import torch
 # from models.simple_convnet import SimpleConvNet
 # from models.UNet import UNet
 # from models.UNetLight import UNet_Light
-from models.Resnet import UNetResNet18
+from models.resnet import UNetResNet18
 import torch.nn as nn
 from train.loader import get_loader
 from utils.evaluation import run_evaluation
@@ -27,7 +27,7 @@ def main():
     else:
         print("\n\nLoading data...")
         dataset = get_processed_data(subset=subset)
-        train_loader, val_loader, test_loader = get_loader(dataset, batch_size=10)
+        train_loader, val_loader, test_loader = get_loader(dataset, batch_size=6)
 
         print("Size of training dataset: ", len(train_loader.dataset))
         print("Size of validation dataset: ", len(val_loader.dataset))
@@ -35,7 +35,7 @@ def main():
 
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001) # burde kanskje ha mindre lr når man bruker pretrained resnet?
         loss_fn = nn.CrossEntropyLoss()
-        n_epochs = 30
+        n_epochs = 10
 
         print("\n\nTraining model...")
         losses_train = train(n_epochs, optimizer, model, loss_fn, train_loader, device=DEVICE)
@@ -48,7 +48,7 @@ def main():
 
     print("\n\nRunning evaluation...")
     eval_dataset = get_processed_evaluation_data(subset=subset)
-    eval_loader = DataLoader(eval_dataset, batch_size=10, shuffle=False)
+    eval_loader = DataLoader(eval_dataset, batch_size=8, shuffle=False)
     torch.cuda.empty_cache()
     run_evaluation(model, eval_loader, device=DEVICE)
     print("\n\nEvaluation completed.\n\n")
