@@ -38,46 +38,27 @@ class UNetResNet18(nn.Module):
         x1 = self.encoder.bn1(x1)
         x1 = self.encoder.relu(x1)
         x1 = self.encoder.maxpool(x1)
-        print("x1",x1.shape)
         
         x2 = self.encoder.layer1(x1)
-        print("x2",x2.shape)
         x3 = self.encoder.layer2(x2)
-        print("x3",x3.shape)
         x4 = self.encoder.layer3(x3)
-        print("x4",x4.shape)
         x5 = self.encoder.layer4(x4)
-        print("x5",x5.shape)
         
         # Decoder with skip connections
         d4 = self.up1(x5)  # 512 -> 256
-        print("d4",d4.shape)
         d4 = self.conv1(d4)
-        print("d4",d4.shape)
         
         d3 = self.up2(d4)  # 256 -> 128
-        print("d3",d3.shape)
         d3 = self.conv2(d3)
-        print("d3",d3.shape)
         
         d2 = self.up3(d3)  # 128 -> 64
-        print("d2",d2.shape)
         d2 = self.conv3(d2)
-        print("d2",d2.shape)
         
         d1 = self.up4(d2)  # 64 -> 32
-        print("d1",d1.shape)
         d1 = self.conv4(d1)
-        print("d1",d1.shape)
-        
-        #d0 = self.up5(d1)  # 32 -> 16
-        #print("d0",d0.shape)
-        #d0 = self.conv5(d0)
-        #print("d0",d0.shape)
         
         # Final classification layer
         out = self.final_conv(d1)
-        print("out",out.shape)
         
         return out
 
