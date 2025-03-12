@@ -5,7 +5,7 @@ import numpy as np
 
 class_names = ['plantation', 'logging', 'mining', 'grassland_shrubland']
 
-def run_evaluation(model, loader, device):
+def run_evaluation(model, loader, device, filename="output.json"):
     model.to(device) # Ensure model is on the correct device
     model_outputs = []  # Store model outputs
     model.eval()
@@ -23,7 +23,7 @@ def run_evaluation(model, loader, device):
 
     # Convert to Json
     json_data = polygons_to_json(model_polygons)
-    save_json_to_folder(json_data, "./data/predictions")
+    save_json_to_folder(json_data, "./data/predictions", filename=filename)
 
 def f1_from_polygons(pred_polygons_list, gt_polygons_list, iou_threshold=0.5):
     print("Length of pred and gt polygons:")
