@@ -75,4 +75,3 @@ class UNetResNet18(nn.Module):
 # model = UNetResNet18(num_classes=5)
 # total_params = sum(p.numel() for p in model.parameters())
 # print(f'Total number of parameters to train: {total_params}')
-# 
