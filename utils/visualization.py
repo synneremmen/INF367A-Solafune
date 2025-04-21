@@ -22,14 +22,12 @@ def get_unique_classes(image_label):
     return unique_classes
 
 
-def plot_image(filename, num_plots=2, band=5, no_nan=False, labels=None, polygons=True, type="train"):
+def plot_image(filename, num_plots=2, band=5, no_nan=False, labels=None, polygons=True):
     image_label = None
 
     labels_path = LABELS_PATH
     images_path = IMAGES_PATH
     
-    if type == "eval":
-        labels_path = EVAL_LABELS_PATH
     print(f"Labels path: {labels_path}")
     print(f"Images path: {images_path}")
 
@@ -65,9 +63,10 @@ def plot_image(filename, num_plots=2, band=5, no_nan=False, labels=None, polygon
             if num_plots == 1:
                 ax = [ax]
 
-            for i in range(num_plots):
-                ax[i].set_title(f"Band {band+i}")
-                val = src.read(band+i)
+            for i in range(1,num_plots+1):
+                print((band+i) % 12)
+                ax[i].set_title(f"Band {(band+i) % 12}")
+                val = src.read((band+i) % 12)
 
                 if no_nan:
                     cmap = plt.cm.viridis
@@ -199,6 +198,52 @@ def plot_predictions(filename, band=1):
                 coords = [(segmentation[j], segmentation[j+1]) for j in range(0, len(segmentation), 2)]
                 polygon = Polygon(coords, edgecolor='red', lw=2, facecolor="red", alpha=0.3, label=class_name)
                 ax[1].add_patch(polygon)         
+
+            plt.show()
+    else:
+        print(f'No annotations found for {filename}.')
+
+
+def plot_all_bands(filename):
+    image_label = None
+
+    labels_path = LABELS_PATH
+    images_path = IMAGES_PATH
+    
+    print(f"Labels path: {labels_path}")
+    print(f"Images path: {images_path}")
+
+    os.chdir(os.path.join(os.path.dirname(__file__), '..'))
+    if not os.path.exists(labels_path):
+        print(f"Cant find path: {os.getcwd()}")
+        raise FileNotFoundError("No labels found.")
+    
+    with open(labels_path, 'r') as file:
+        labels = json.load(file)
+
+    for image in labels["images"]:
+        if image["file_name"] == filename:
+            print(f"Found {filename}")
+            image_label = image["annotations"] 
+            break
+    
+    if image_label:
+        if not os.path.exists(images_path):
+            raise FileNotFoundError("No images found.")
+    
+        with rasterio.open(os.path.join(images_path, filename)) as src:
+            _, ax = plt.subplots(3, 4, figsize=(30, 20))
+
+            unique_classes = ', '.join(get_unique_classes(image_label))
+            
+            title = f'{filename} with class(es): {unique_classes}'
+            plt.suptitle(title)
+
+            for i in range(src.count):
+                row, col = divmod(i, 4)
+                ax[row, col].set_title(f"Band {i+1}")
+                val = src.read(i+1)
+                ax[row, col].imshow(val)
 
             plt.show()
     else:
