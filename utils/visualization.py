@@ -25,12 +25,13 @@ def get_unique_classes(image_label):
 def plot_image(filename, num_plots=2, band=5, no_nan=False, labels=None, polygons=True, type="train"):
     image_label = None
 
-    if type == "train":
-        labels_path = LABELS_PATH
-        images_path = IMAGES_PATH
-    elif type == "eval":
+    labels_path = LABELS_PATH
+    images_path = IMAGES_PATH
+    
+    if type == "eval":
         labels_path = EVAL_LABELS_PATH
-        images_path = EVAL_IMAGES_PATH
+    print(f"Labels path: {labels_path}")
+    print(f"Images path: {images_path}")
 
     os.chdir(os.path.join(os.path.dirname(__file__), '..'))
     if not os.path.exists(labels_path):
@@ -127,3 +128,78 @@ def plot_masked_image(filename):
     ax.set_title("Polygons with classes")
     plt.show()
     src.close()
+
+
+def plot_predictions(filename, band=1):
+    image_label = None
+    image_pred = None
+
+    images_path = IMAGES_PATH
+    labels_path = LABELS_PATH
+    predictions_path = EVAL_LABELS_PATH
+
+    os.chdir(os.path.join(os.path.dirname(__file__), '..'))
+    if not os.path.exists(labels_path):
+        print(f"Cant find path: {os.getcwd()}")
+        raise FileNotFoundError("No labels found.")
+    
+    if not os.path.exists(predictions_path):
+        print(f"Cant find path: {os.getcwd()}")
+        raise FileNotFoundError("No predictions found.")
+    
+    with open(labels_path, 'r') as file:
+        labels = json.load(file)
+
+    with open(predictions_path, 'r') as file:
+        predictions = json.load(file)
+
+    for image in labels["images"]:
+        if image["file_name"] == filename:
+            print(f"Found ground truth for {filename}")
+            image_label = image["annotations"] 
+            break
+
+    for image in predictions["images"]:
+        if image["file_name"] == filename:
+            print(f"Found prediction for {filename}")
+            image_pred = image["annotations"] 
+            break
+    
+    if image_label and image_pred:
+        if not os.path.exists(images_path):
+            raise FileNotFoundError("No images found.")
+    
+        with rasterio.open(os.path.join(images_path, filename)) as src:
+            _, ax = plt.subplots(1, 2, figsize=(15, 5))
+
+            unique_classes = ', '.join(get_unique_classes(image_label))
+            
+            title = f'{filename} with class(es): {unique_classes}'
+            plt.suptitle(title)
+
+            ax[0].set_title("Ground truth")
+            ax[1].set_title("Predictions")
+
+            val = src.read(band)
+            ax[0].imshow(val)
+            ax[1].imshow(val)
+        
+            for polygon in image_label:
+                class_name = polygon['class']
+                segmentation = polygon['segmentation']
+                
+                coords = [(segmentation[j], segmentation[j+1]) for j in range(0, len(segmentation), 2)]
+                polygon = Polygon(coords, edgecolor='red', lw=2, facecolor="red", alpha=0.3, label=class_name)
+                ax[0].add_patch(polygon)         
+
+            for polygon in image_pred:
+                class_name = polygon['class']
+                segmentation = polygon['segmentation']
+                
+                coords = [(segmentation[j], segmentation[j+1]) for j in range(0, len(segmentation), 2)]
+                polygon = Polygon(coords, edgecolor='red', lw=2, facecolor="red", alpha=0.3, label=class_name)
+                ax[1].add_patch(polygon)         
+
+            plt.show()
+    else:
+        print(f'No annotations found for {filename}.')
