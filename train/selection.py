@@ -2,7 +2,7 @@ import torch.nn as nn
 #   from train.optimizer import adam, sgd
 #   from train.loss import 
 from train import train
-from utils.evaluation import evaluate
+from utils.evaluation import run_evaluation
 from itertools import product
 
 def selection(models:list[nn.Module], params:dict, train_loader, val_loader, device) -> None:
@@ -24,7 +24,7 @@ def selection(models:list[nn.Module], params:dict, train_loader, val_loader, dev
             model, train_loss, val_loss = train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=None)
 
              # Compute validation score using `evaluate()`
-            val_score = evaluate(y_pred, y_true)
+            val_score = run_evaluation(model, val_loader, device)
 
             print(f"Model: {type(model).__name__}, LR: {lr}, Epochs: {n_epochs}, Val Loss: {val_score}")
     

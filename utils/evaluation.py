@@ -5,7 +5,7 @@ import numpy as np
 
 class_names = ['plantation', 'logging', 'mining', 'grassland_shrubland']
 
-def run_evaluation(model, loader, device, filename="output.json"):
+def run_evaluation(model, loader, device, save=False, filename="output.json"):
     model.to(device) # Ensure model is on the correct device
     model_outputs = []  # Store model outputs
     true_labels = []  # Store true labels
@@ -25,14 +25,17 @@ def run_evaluation(model, loader, device, filename="output.json"):
     pred_polygons = outputs_to_polygons(model_outputs.cpu().numpy())
     true_polygons = labels_to_polygons(loader)
 
-    # Convert to Json
-    json_data = polygons_to_json(pred_polygons)
-    save_json_to_folder(json_data, "./data/predictions", filename=filename)
-    print(f"Model outputs saved to {filename}")
+    if save:
+        # Convert to Json
+        json_data = polygons_to_json(pred_polygons)
+        save_json_to_folder(json_data, "./data/predictions", filename=filename)
+        print(f"Model outputs saved to {filename}")
 
     score = f1_from_polygons(pred_polygons, true_polygons)
     print("F1 score calculated.")
-    print(score)
+    print("F1:",score["Overall"]["F1"])
+    print("Precision:",score["Overall"]["Precision"])
+    print("Recall:",score["Overall"]["Recall"])
 
 def f1_from_polygons(pred_polygons_list, gt_polygons_list, iou_threshold=0.5):
     print("Length of pred and gt polygons:")
