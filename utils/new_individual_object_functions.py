@@ -1,15 +1,10 @@
 import os
-from typing import Tuple, Dict
 from rasterio.transform import Affine
 from rasterio.features import rasterize
 import numpy as np
 import rasterio
 from shapely.geometry import Polygon
-import cv2
-from rasterio.plot import reshape_as_image
-#from rasterio.mask import mask
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.utils import to_categorical
 from utils.preprocessing import get_processed_data
 from utils.augmentation import augment 
 import random
