@@ -1,29 +1,41 @@
 import solafune_tools.metrics as metrics
 import torch
-from utils.postprocessing import outputs_to_polygons, polygons_to_json , save_json_to_folder
+from utils.postprocessing import labels_to_polygons, outputs_to_polygons, polygons_to_json , save_json_to_folder
 import numpy as np
 
 class_names = ['plantation', 'logging', 'mining', 'grassland_shrubland']
 
-def run_evaluation(model, loader, device, filename="output.json"):
+def run_evaluation(model, loader, device, save=False, filename="output.json"):
     model.to(device) # Ensure model is on the correct device
     model_outputs = []  # Store model outputs
+    true_labels = []  # Store true labels
     model.eval()
+
     with torch.inference_mode():
-        # model_outputs = []
-        for inputs in loader:
-            inputs_tensor = inputs[0].to(device)
-            outputs = model(inputs_tensor)
+        for image, label in loader:
+            image_tensor = image.to(device)
+            outputs = model(image_tensor)
+
             model_outputs.append(outputs)
+            true_labels.append(label)
 
     model_outputs = torch.cat(model_outputs, dim=0)
-    # return outputs_to_polygons(model_outputs.detach().cpu().numpy())
+    #true_labels = torch.cat(true_labels, dim=0)
 
-    model_polygons = outputs_to_polygons(model_outputs.detach().cpu().numpy())
+    pred_polygons = outputs_to_polygons(model_outputs.cpu().numpy())
+    true_polygons = labels_to_polygons(loader)
 
-    # Convert to Json
-    json_data = polygons_to_json(model_polygons)
-    save_json_to_folder(json_data, "./data/predictions", filename=filename)
+    if save:
+        # Convert to Json
+        json_data = polygons_to_json(pred_polygons)
+        save_json_to_folder(json_data, "./data/predictions", filename=filename)
+        print(f"Model outputs saved to {filename}")
+
+    score = f1_from_polygons(pred_polygons, true_polygons)
+    print("F1 score calculated.")
+    print("F1:",score["Overall"]["F1"])
+    print("Precision:",score["Overall"]["Precision"])
+    print("Recall:",score["Overall"]["Recall"])
 
 def f1_from_polygons(pred_polygons_list, gt_polygons_list, iou_threshold=0.5):
     print("Length of pred and gt polygons:")
