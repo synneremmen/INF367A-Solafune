@@ -177,6 +177,3 @@ cython_debug/
 /data
 /loaded
 /models
-
-# custom project files
-satmae_pp/

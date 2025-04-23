@@ -1,0 +1,3 @@
+[submodule "satmae_pp"]
+	path = satmae_pp
+	url = https://github.com/auroraingebrigtsen/satmae_pp.git
