@@ -39,7 +39,7 @@ def main():
         optimizer = torch.optim.Adam(
             model.parameters(), lr=0.001
         )  # endret lr fra 0.001 til 0.0001
-        loss_fn = nn.CrossEntropyLoss()
+        loss_fn = nn.CrossEntropyLoss(ignore_index=0)
         n_epochs = 30
 
         # Add learning rate scheduler (reduces LR every 10 epochs by factor of 0.1)

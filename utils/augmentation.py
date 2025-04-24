@@ -4,55 +4,41 @@ from albumentations import (
     Transpose, Blur, OpticalDistortion, GridDistortion, HueSaturationValue,
     GaussNoise, MotionBlur, MedianBlur, PiecewiseAffine,
     Sharpen, Emboss, RandomBrightnessContrast, OneOf, Compose, RandomGamma,
-    ChannelShuffle, RGBShift, HorizontalFlip, VerticalFlip
+    ChannelShuffle, RGBShift, HorizontalFlip, VerticalFlip, Rotate, MultiplicativeNoise
 )
 
 def aug(p, color_aug_prob, geometric_aug_prob):
-    # funker ikke med GuassNoise, HueSaturationValue, CLAHE
-    # dårlig med RandomBrightnessContrast, RandomGamma, Emboss, MotionBlur
-
     return Compose([
         OneOf([
             HorizontalFlip(),
-            VerticalFlip()
+            VerticalFlip(),
+            RandomRotate90(), 
         ], p=geometric_aug_prob),
         OneOf([
-            OpticalDistortion(p=1), 
-        ], p=color_aug_prob)
-    ], p=p, seed=42)
-    # return Compose([
-    #     RandomRotate90(p=0.8),
-    #     OneOf([
-    #         HorizontalFlip(p=1),
-    #         VerticalFlip(p=0)
-    #     ]),
-    #     OneOf([
-    #         GaussNoise(p=1), 
-    #         HueSaturationValue(p=1), 
-    #         CLAHE(p=1),
-    #         OpticalDistortion(p=1), 
-    #         RandomBrightnessContrast(p=1),
-    #         RandomGamma(p=1),
-    #         Emboss(p=1),
-    #         MotionBlur(p=1),
-    #     ], p=color_aug_prob)
-    # ], p=p, seed=42)
+            OpticalDistortion(), 
+            MultiplicativeNoise(multiplier=(0.9, 1.1), per_channel=True),
+            #GaussNoise(var_limit=(1.0, 5.0), per_channel=True)
+        ], p=color_aug_prob),
+    ], 
+        p=p, 
+        #seed=42,
+        additional_targets={'mask': 'mask'}
+        )
 
-def augment(img, mask, color_aug_prob, geometric_aug_prob=0.6, p=0.9):
-    
-    # our images are in the form (12, 1024, 1024)
+def augment(img, mask, augm_prob=0.9, color_aug_prob=0.6, geometric_aug_prob=0.6):
+    # our images are on the form (12, 1024, 1024)
     # want input on the form (1024, 1024, 12)
-    img = img.transpose(2,1,0) 
-    mask = mask.transpose(2,1,0)
+    img = img.transpose(1, 2, 0)
 
-    aug_func = aug(p, color_aug_prob, geometric_aug_prob) # lager en funksjon for å kjøre Compose på img - img_mask pair
-    
-    data = {"image": img, "mask": mask} # img.astype(np.float32)/255
-    
+    img = img.astype(np.float32)
+    mask = mask.astype(np.float32)
+
+    aug_func = aug(augm_prob, color_aug_prob, geometric_aug_prob)
+    data = {"image": img, "mask": mask}
     augmented = aug_func(**data)
 
     # transpose the image back to (12, 1024, 1024)
-    augmented["image"] = augmented["image"].transpose(2,1,0)
-    augmented["mask"] = augmented["mask"].transpose(2,1,0)
+    augmented["image"] = augmented["image"].transpose(2,0,1).astype(np.float64)
+    augmented["mask"] = augmented["mask"].astype(np.float64)
     
-    return augmented
+    return augmented["image"], augmented["mask"]

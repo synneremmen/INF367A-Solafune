@@ -225,6 +225,7 @@ class Generator:
                             building_mask[:,:,2] = img_extra[:, :,2] * mask_id + building_mask[:,:,2] * np.where(mask_id, 0, 1)
 
             # add augm for object crop
+            # augment together
             if self.augm:
                 building_mask, mask_tmp = augment(building_mask.astype(np.uint8), mask, self.color_aug_prob)
                 # Oppdaterer masken med nye augmenterte objektet
@@ -246,6 +247,7 @@ class Generator:
             flag_background = False
 
             # om vi har bakgrunner, og gitt en sannsynlighet
+            # with some probability, background should be augmented
             if len(self.background_list_train) and random.random() < self.background_prob:
                 # sette om vi trener eller evaluerer
                 if self.val:
@@ -255,6 +257,7 @@ class Generator:
                 # ja augmenter bakgrunnen
                 flag_background = True
             else:
+                # if 
                 attempt = 0
                 if self.val:
                     random_key = random.choice(list(self.json_file_cl0_val.keys()))
@@ -371,6 +374,8 @@ class Generator:
         img = img.clip(0, 1) # setter verdier mellom 0 og 1
         return np.asarray(img), np.asarray(mask) #, np.asarray(background/ 255.), np.asarray(img_initial/ 255.)
     
+
+    
     def extract_val(self, sample):
         return sample['upper_left_x'], sample['upper_left_y'], sample['pol_width'], sample['pol_height']
     
@@ -418,7 +423,6 @@ class Generator:
    
     def read_json(self, folder):
         js_full = {}
-        samples_set = set()
         json_file = '{}/{}.json'.format(folder, "train_annotations")
         with open(json_file, 'r') as f:
             js_tmp = json.load(f)
@@ -442,21 +446,6 @@ class Generator:
 
         return train_samples, val_samples
     
-    '''
-    def train_val_split(self, js_full, split_ration):               
-        seed(1)
-        train_samples, val_samples = {}, {}
-        keys_list = set(js_full.keys())
-        for key in keys_list:
-            if js_full[key]["upper_left_y"] > 1620: # this threshold is for Venture image
-                train_samples[key] = js_full[key]
-            else:
-                val_samples[key] = js_full[key]
-            del js_full[key]
-
-        return train_samples, val_samples
-    # forskjell på denne og den under er treshold, egenspesifisert
-    '''
 
     # split dataset: this is to be done in the loader, not needed? 
     def train_val_split(self, js_full, split_ration):               
@@ -470,11 +459,6 @@ class Generator:
                 val_samples[key] = js_full[key]
             del js_full[key]
         return train_samples, val_samples
-        #self.val_upper_threshold = 0
-        #self.val_lower_threshold = 1620
-        #self.train_upper_threshold = 1620
-        #self.train_lower_threshold = 4418
-          
 
     
     def load_dataset(self, folder, folders_val = None, split_ration=0.7):
@@ -487,75 +471,7 @@ class Generator:
         #     self.json_file_train, self.json_file_val = self.train_val_split_prob(self.read_json(folder), split_ration)
         else:
             self.json_file_train, self.json_file_val = self.train_val_split(self.read_json(folder), split_ration)
-            
-def f1_score(pred, mask):
-    TP = 0
-    FP = 0
-    TN = 0
-    FN = 0
-    
-    TP += np.sum(pred[:,:,0]*mask[0,:,:])
-    FN += np.sum((pred[:,:,0]==0)*mask[0,:,:])
-
-    TN += np.sum((pred[:,:,0]==0)*(mask[0,:,:]==0))
-    FP += np.sum((pred[:,:,0]==1)*(mask[0,:,:]==0))
-
-    precision = TP / (TP + FP)
-    recall = TP / (TP + FN)
-    accuracy = (TP + TN) / (TP + TN + FP + FN) 
-    f1_cl = 2*((precision*recall)/(precision+recall))
-
-    return round(f1_cl, 3) 
-
-# # Aurora sin f1 socre:
-# from solafune_tools import metrics
-# def f1_from_polygons(pred_polygons_list, gt_polygons_list, iou_threshold=0.5):
-#     print("Length of pred and gt polygons:")
-#     print(len(pred_polygons_list), len(gt_polygons_list))
-#     iou_metrics = metrics.IOUBasedMetrics()
-    
-#     all_classes = set()
-#     for pred_dict in pred_polygons_list:
-#         all_classes.update(pred_dict.keys())
-#     for gt_dict in gt_polygons_list:
-#         all_classes.update(gt_dict.keys())
-
-#     f1_scores = {class_idx: {"F1": [], "Precision": [], "Recall": []} for class_idx in all_classes}
-#     total_tp, total_fp, total_fn = 0, 0, 0
-
-#     for pred_polygons, gt_polygons in zip(pred_polygons_list, gt_polygons_list):
-#         for class_idx in all_classes:
-#             preds = pred_polygons.get(class_idx, [])
-#             gts = gt_polygons.get(class_idx, [])
-            
-#             f1, precision, recall = iou_metrics.compute_f1(gts, preds, iou_threshold)
-
-#             f1_scores[class_idx]["F1"].append(f1)
-#             f1_scores[class_idx]["Precision"].append(precision)
-#             f1_scores[class_idx]["Recall"].append(recall)
-
-#             # Track TP, FP, FN
-#             tp = len(preds) - (len(preds) - len(gts))  # Approximate TP count
-#             fp = len(preds) - tp
-#             fn = len(gts) - tp
-#             total_tp += tp
-#             total_fp += fp
-#             total_fn += fn
-
-#     # Aggregate class-wise metrics
-#     for class_idx in f1_scores:
-#         f1_scores[class_idx]["F1"] = np.mean(f1_scores[class_idx]["F1"])
-#         f1_scores[class_idx]["Precision"] = np.mean(f1_scores[class_idx]["Precision"])
-#         f1_scores[class_idx]["Recall"] = np.mean(f1_scores[class_idx]["Recall"])
-
-#     # Compute overall F1
-#     overall_precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 1.0
-#     overall_recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 1.0
-#     overall_f1 = 2 * overall_precision * overall_recall / (overall_precision + overall_recall) if (overall_precision + overall_recall) > 0 else 0.0
-
-#     f1_scores["Overall"] = {"F1": overall_f1, "Precision": overall_precision, "Recall": overall_recall}
-
-#     return f1_scores
+  
 
 # # Ser ikke ut til å bli brukt noen sted, kun hastaget kode
 def rotate(img, angle): # roterer kun bildet, ikke masken
