@@ -42,15 +42,14 @@ class Generator:
         self.extra_background_prob = 0.6
         self.background_augm_prob = 0.6
         
-        self.augm_seperately = False
         self.flag_object_augm = False
 
         self.shadows = False
-        self.extra_objects = 0  
+        self.extra_objects = 3
 
         # values for image-mask augmentation
         self.augm_prob = 0.9
-        self.geometric_augm_prob = 0.6
+        self.geometric_augm_prob = 0.5
         self.color_augm_prob = 0
 
         # self.stands_id = False # vet ikke hva denne gjør. Hvilke id?
@@ -183,7 +182,7 @@ class Generator:
         self.visualize(background[2], mask)
         background, mask = self._prepare_image_and_mask(background, mask)
 
-        if random.random() < self.background_augm_prob and self.augm_seperately:
+        if random.random() < self.background_augm_prob:
             # by some probability, augment background
             background, mask = self._augment_image_mask(background, mask)
         
@@ -266,7 +265,7 @@ class Generator:
                     cropped_obj, cropped_mask = self.crop_target_object(extra_id)
 
                     if np.sum(cropped_mask * temp_mask) == 0:
-                        if random.random() < self.object_augm_prob and self.augm_seperately:
+                        if random.random() < self.object_augm_prob:
                             # by some probability, augment object
                             cropped_obj, cropped_mask = self._augment_image_mask(cropped_obj, cropped_mask)
                             self.flag_object_augm = True
@@ -335,7 +334,6 @@ def create_OBA_dataset(
         object_augm=False, 
         extra_background_prob=0,
         background_augm_prob=0,
-        augm_seperately=False,
         shadows=False,
         extra_objects=5,
         object_augm_prob=0,
@@ -356,7 +354,6 @@ def create_OBA_dataset(
     generator.object_augm = object_augm
     generator.extra_background_prob = extra_background_prob
     generator.background_augm_prob = background_augm_prob
-    generator.augm_seperately = augm_seperately
     generator.shadows = shadows
     generator.extra_objects = extra_objects
     generator.object_augm_prob = object_augm_prob
