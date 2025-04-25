@@ -48,14 +48,14 @@ def main(model_selection=False, subset=False):
             print("\n\nModel selection...")
 
             param_grid = {
-                'lr': [0.1], #, 0.001, 0.001],
-                'decay': [0.01], #, 0.001],
-                'mom': [0.9] #, 0.99],
+                'lr': [0.1, 0.001, 0.001],
+                'decay': [0.01, 0.001],
+                'mom': [0.9, 0.99],
             }
             models = {
                 "SimpleConvNet": SimpleConvNet,
-                 #"UNet": UNet,
-                 #"UNetResNet18": UNetResNet18,
+                 "UNet": UNet,
+                 "UNetResNet18": UNetResNet18,
             }
 
             print("\n\nTraining model selection...")
