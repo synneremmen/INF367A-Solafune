@@ -33,45 +33,32 @@ def train_model_selection(models, params, n_epochs, loss_fn, train_loader, val_l
     best_params = None
     best_train_losses = None
     best_val_losses = None
-    i = 0
-
-    # loop over params
-
     
-    for name, model in models.items(): # refine model selection loop (presently we need to define a model for eacgh set of hyperparams)
-        if i%2 == 0:
-            param = params[0]
-        else:
-            param = params[1]
-    
-        optimizer = optim.Adam(model.parameters(), lr=param['lr'], betas=param['mom'], weight_decay=param['decay'])
-        print("Current hyperparamters:")
-        print(param)
 
-        print(f"Training {name} using train...")
-        train_losses, val_losses = train(model, optimizer,scheduler,n_epochs, loss_fn, train_loader, val_loader, device)
+    for name, model_fn in models.items():
+        for idx, param in enumerate(params):
+            model = model_fn().to(device)  # fresh instance for each run
+            optimizer = optim.Adam(model.parameters(), lr=param['lr'], betas=param['mom'], weight_decay=param['decay'])
 
-        print()
+            print(f"Training {name} with param set {idx}: {param}")
+            train_losses, val_losses = train(model, optimizer, scheduler, n_epochs, loss_fn, train_loader, val_loader, device)
 
-        val_score = run_evaluation(model, val_loader, device, save=False)
+            val_score = run_evaluation(model, val_loader, device, save=False)
 
-        print(f"Model: {name}, validation score: {val_score}")
+            print(f"Model: {name}, Param set {idx}, Validation score: {val_score}")
+            print("=" * 50)
 
-        print("=" * 50)
+            if val_score > best_val_score:
+                best_val_score = val_score
+                best_model = model
+                best_model_name = f"{name}_paramset_{idx}"
+                best_params = param
+                best_train_losses = train_losses
+                best_val_losses = val_losses
 
-        # update best best_model
-        if val_score > best_val_score:
-            best_val_score = val_score
-            best_model = model
-            best_model_name = name
-            best_params = param
-            best_train_losses = train_losses
-            best_val_losses = val_losses
-        i += 1
-
-        print(f'Model selection completed')
-        print(f"Best model: {best_model_name}, score: {best_val_score}")
-        print(f"Best params: {best_params}")
+    print(f'\nModel selection completed')
+    print(f"Best model: {best_model_name}, score: {best_val_score}")
+    print(f"Best params: {best_params}")
 
     return best_model, best_model_name, best_params, best_val_score, best_train_losses, best_val_losses
 
@@ -100,10 +87,9 @@ hyperparams = [
 ]
 
 # models, defined under the models definition section
-models = {'model_small_1': MyNetSmall(),
-          'model_small_2': MyNetSmall(),
-          'model_medium_1': MyNetMedium(),
-          'model_medium_2': MyNetMedium(),
-          'model_large_1': MyNetLarge(),
-          'model_large_2': MyNetLarge()}
+models = {
+    'model_small': MyNetSmall,
+    'model_medium': MyNetMedium,
+    'model_large': MyNetLarge
+}
 """
