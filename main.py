@@ -63,6 +63,13 @@ def main(model_selection=False, subset=False, use_OB=False):
         print("\n\nLoading saved model...")
         model.load_state_dict(torch.load(MODEL_PATH, weights_only=True))
 
+        print("\n\nSaving model...")
+        torch.save(model.state_dict(), MODEL_PATH)
+
+        print("\n\nRunning evaluation...")
+        torch.cuda.empty_cache()
+        run_evaluation(model, test_loader, device=DEVICE, save=False, filename=f"output_{str(model).split('(')[0]}.json")
+
     else:
         loss_fn = nn.CrossEntropyLoss(ignore_index=0)
         n_epochs = 30
@@ -93,7 +100,14 @@ def main(model_selection=False, subset=False, use_OB=False):
                 early_stopping=True, 
                 patience=5,  # early stopping if it doesn't improve for 5 epochs
             )
-            model = best_model
+
+            print("\n\nSaving model...")
+            torch.save(best_model.state_dict(), MODEL_PATH)
+
+            print("\n\nRunning evaluation...")
+            torch.cuda.empty_cache()
+            run_evaluation(best_model, test_loader, device=DEVICE, save=False, filename=f"output_{str(model).split('(')[0]}.json")
+
 
         else: # train a model
             print("\n\nTraining model...")
@@ -114,12 +128,12 @@ def main(model_selection=False, subset=False, use_OB=False):
             print("\n\nTraining completed. Training losses:")
             print(losses_train)
 
-    print("\n\nSaving model...")
-    torch.save(model.state_dict(), MODEL_PATH)
+            print("\n\nSaving model...")
+            torch.save(model.state_dict(), MODEL_PATH)
 
-    print("\n\nRunning evaluation...")
-    torch.cuda.empty_cache()
-    run_evaluation(model, test_loader, device=DEVICE, save=True, filename=f"output_{str(model).split('(')[0]}.json")
+            print("\n\nRunning evaluation...")
+            torch.cuda.empty_cache()
+            run_evaluation(model, test_loader, device=DEVICE, save=True, filename=f"output_{str(model).split('(')[0]}.json")
 
     print("\n\nEvaluation completed.\n\n")
 
