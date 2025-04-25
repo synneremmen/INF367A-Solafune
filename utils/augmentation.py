@@ -1,29 +1,45 @@
 import numpy as np
 from albumentations import (
-    HorizontalFlip, Perspective, ShiftScaleRotate, CLAHE, RandomRotate90,
-    Transpose, Blur, OpticalDistortion, GridDistortion, HueSaturationValue,
-    GaussNoise, MotionBlur, MedianBlur, PiecewiseAffine,
-    Sharpen, Emboss, RandomBrightnessContrast, OneOf, Compose, RandomGamma,
-    ChannelShuffle, RGBShift, HorizontalFlip, VerticalFlip, Rotate, MultiplicativeNoise
+    HorizontalFlip,
+    RandomRotate90,
+    Transpose,
+    OneOf,
+    Compose,
+    VerticalFlip,
+    Lambda,
 )
 
+
 def aug(p, color_aug_prob, geometric_aug_prob):
-    return Compose([
-        OneOf([
-            HorizontalFlip(),
-            VerticalFlip(),
-            RandomRotate90(), 
-        ], p=geometric_aug_prob),
-        OneOf([
-            OpticalDistortion(), 
-            MultiplicativeNoise(multiplier=(0.9, 1.1), per_channel=True),
-            GaussNoise(var_limit=(1.0, 5.0), per_channel=True)
-        ], p=color_aug_prob),
-    ], 
-        p=p, 
-        #seed=42,
-        additional_targets={'mask': 'mask'}
-        )
+    return Compose(
+        [
+            OneOf(
+                [
+                    HorizontalFlip(),
+                    VerticalFlip(),
+                    RandomRotate90(),
+                    Transpose(),
+                ],
+                p=geometric_aug_prob,
+            ),
+            OneOf(
+                [
+                    Lambda(
+                        image=lambda x, **kwargs: x
+                        + np.random.normal(0, 0.01, x.shape).astype(np.float32)
+                    ),
+                    Lambda(
+                        image=lambda x, **kwargs: x
+                        * np.random.uniform(0.9, 1.1, x.shape).astype(np.float32)
+                    ),
+                ],
+                p=color_aug_prob,
+            ),
+        ],
+        p=p,
+        additional_targets={"mask": "mask"},
+    )
+
 
 def augment(img, mask, augm_prob=0.9, color_aug_prob=0.6, geometric_aug_prob=0.6):
     # our images are on the form (12, 1024, 1024)
@@ -38,7 +54,7 @@ def augment(img, mask, augm_prob=0.9, color_aug_prob=0.6, geometric_aug_prob=0.6
     augmented = aug_func(**data)
 
     # transpose the image back to (12, 1024, 1024)
-    augmented["image"] = augmented["image"].transpose(2,0,1).astype(np.float64)
+    augmented["image"] = augmented["image"].transpose(2, 0, 1).astype(np.float64)
     augmented["mask"] = augmented["mask"].astype(np.float64)
-    
+
     return augmented["image"], augmented["mask"]

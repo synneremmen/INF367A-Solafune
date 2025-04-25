@@ -201,7 +201,7 @@ class Generator:
             mask = self.masks[rnd_choice]["image"][0]  # mask has shape (1, 1024, 1024)
         return background, mask, rnd_choice
 
-    def _prepare_image_and_mask(self, background, mask):
+    def _prepare_image_and_mask(self, background, init_mask):
         """
         Prepares the image and mask for augmentation.
         Args:
@@ -210,11 +210,11 @@ class Generator:
         Returns:
             tuple: The prepared image and mask.
         """
-        background = (
+        image = (
             background.clone() if torch.is_tensor(background) else background.copy()
         )
-        mask = mask.clone() if torch.is_tensor(mask) else mask.copy()
-        background = background.numpy() if torch.is_tensor(background) else background
+        mask = init_mask.clone() if torch.is_tensor(init_mask) else init_mask.copy()
+        background = image.numpy() if torch.is_tensor(image) else image
         mask = mask.numpy() if torch.is_tensor(mask) else mask
         return background, mask
 
@@ -254,14 +254,18 @@ class Generator:
                         continue
 
                     cropped_obj, cropped_mask = self._crop_target_object(extra_id)
+                    if random.random() < self.object_augm_prob and self.augm:
+                        cropped_obj, cropped_mask = self._augment_image_mask(
+                            cropped_obj, cropped_mask
+                        )
 
                     # get bounding box of the cropped mask
                     ys, xs = np.where(cropped_mask > 0)
                     if len(xs) == 0 or len(ys) == 0:
                         continue  # Skip empty masks
+
                     bbox_h, bbox_w = ys.max() - ys.min() + 1, xs.max() - xs.min() + 1
 
-                    # try random position
                     max_x = background.shape[2] - bbox_w
                     max_y = background.shape[1] - bbox_h
                     if max_x <= 0 or max_y <= 0:
@@ -270,20 +274,14 @@ class Generator:
                     top = random.randint(0, max_y)
                     left = random.randint(0, max_x)
 
-                    roi_mask = temp_mask[top : top + bbox_h, left : left + bbox_w]
-                    tight_crop_mask = cropped_mask[
-                        ys.min() : ys.max() + 1, xs.min() : xs.max() + 1
-                    ]
+                    crop_h, crop_w = cropped_mask.shape
+                    roi_mask = temp_mask[top : top + crop_h, left : left + crop_w]
+
+                    tight_crop_mask = cropped_mask[ys.min():ys.max()+1, xs.min():xs.max()+1]
 
                     if np.any((roi_mask > 0) & (tight_crop_mask > 0)):
                         continue
 
-                    if random.random() < self.object_augm_prob and self.augm:
-                        cropped_obj, cropped_mask = self._augment_image_mask(
-                            cropped_obj, cropped_mask
-                        )
-
-                    crop_h, crop_w = cropped_mask.shape
                     for c in range(background.shape[0]):
                         temp_image[c, top : top + crop_h, left : left + crop_w] = (
                             np.where(
@@ -378,24 +376,24 @@ class Generator:
         # -------------------------------------------------------------------
         # find the background
         # -------------------------------------------------------------------
-        background, mask, rnd_choice = self._find_background()
-        self.visualize(background[5], mask)
-        background, mask = self._prepare_image_and_mask(background, mask)
+        background, init_mask, rnd_choice = self._find_background()
+        image, mask = self._prepare_image_and_mask(background, init_mask)
 
         if random.random() < self.background_augm_prob and self.augm:
             # by some probability, augment background
-            background, mask = self._augment_image_mask(background, mask)
+            image, mask = self._augment_image_mask(image, mask)
+            self.flag_as_augm = True
 
         # -------------------------------------------------------------------
         # object-based augmentation
         # -------------------------------------------------------------------
         if self.object_augm and random.random() < self.object_augm_prob:
             objects_image, objects_mask = self._apply_object_augmentation(
-                rnd_choice, background, mask
+                rnd_choice, image, mask
             )
             self.flag_as_augm = True
             image, mask = self._insert_objects_to_background(
-                objects_image, objects_mask, background, mask
+                objects_image, objects_mask, image, mask
             )
 
             # -------------------------------------------------------------------
@@ -408,14 +406,10 @@ class Generator:
         # base augmentation (if no object-based augmentation)
         # -------------------------------------------------------------------
         if self.augm and not self.flag_as_augm:
-            image, mask = self._augment_image_mask(background, mask)
+            image, mask = self._augment_image_mask(image, mask)
 
-        # -------------------------------------------------------------------
-        # if no change has occured, return None
-        # -------------------------------------------------------------------
-        if not self.flag_as_augm:  # no augmentation applied
-            return None, None
-
+        self.visualize(background[5], init_mask)
+        self.visualize(image[5], mask)
         return image, mask
 
 
@@ -443,6 +437,7 @@ def create_OBA_dataset(
     Args:
         prob_of_OBA (float): Probability of generating an OBA sample.
         subset (bool): Whether to use a subset of the data.
+        augm (bool): Whether to apply augmentation.
         object_augm (bool): Whether to apply object-based augmentation.
         extra_background_prob (float): Probability of using an extra background.
         background_augm_prob (float): Probability of augmenting the background.
@@ -497,7 +492,6 @@ def create_OBA_dataset(
             ]  # get correct dimensions (should be (1, 1024, 1024))
             x_train_dict.update({f"OBA_{num}": {"image": sample_image}})
             y_train_dict.update({f"OBA_{num}": {"image": sample_mask}})
-            generator.visualize(sample_image[5], sample_mask[0])
 
     x_train = [torch.tensor(each["image"]) for each in x_train_dict.values()]
     y_train = [torch.tensor(each["image"]) for each in y_train_dict.values()]
@@ -515,20 +509,3 @@ def create_OBA_dataset(
     )
 
     return TensorDataset(x_train_tensor, y_train_tensor)
-
-    # augmentation
-    """
-    def augment(image, mask, color_augm_prob):
-        # Assuming image is (H, W, C)
-        visible_indices = [1, 2, 3]  # Assuming ['Blue', 'Green', 'Red'] are at index 1-3
-        if random.random() < color_augm_prob:
-            for i in visible_indices:
-                alpha = random.uniform(0.9, 1.1)  # contrast
-                beta = random.randint(-10, 10)    # brightness
-                image[:, :, i] = np.clip(alpha * image[:, :, i] + beta, 0, 65535)
-        # Apply flipping or other geometric aug here
-        if random.random() > 0.5:
-            image = np.flip(image, axis=1)
-            mask = np.flip(mask, axis=1)
-        return image, mask
-    """
