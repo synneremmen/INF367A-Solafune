@@ -1,10 +1,9 @@
 from utils.preprocessing import get_processed_data
 from train.train import train
 import torch
-
-# from models.simple_convnet import SimpleConvNet
-# from models.UNet import UNet
-from models.UNetLight import UNet_Light
+from models.simple_convnet import SimpleConvNet
+from models.UNet import UNet
+from models.resnet import UNetResNet18
 import torch.nn as nn
 from train.loader import get_loader
 from utils.evaluation import run_evaluation
@@ -20,9 +19,9 @@ MODEL_PATH = "models/saved_model.pth"
 
 def main():
     subset = False
-    model = UNet_Light().to(
+    model = UNet().to(
         DEVICE
-    )  # SimpleConvNet().to(DEVICE) # UNet().to(DEVICE) # UNet_Light().to(DEVICE) # UNetResNet18().to(DEVICE)
+    )  # SimpleConvNet().to(DEVICE) # UNetResNet18().to(DEVICE)
 
     print("\n\nLoading data...")
     dataset = get_processed_data(subset=subset)

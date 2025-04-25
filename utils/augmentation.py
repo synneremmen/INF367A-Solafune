@@ -17,7 +17,7 @@ def aug(p, color_aug_prob, geometric_aug_prob):
         OneOf([
             OpticalDistortion(), 
             MultiplicativeNoise(multiplier=(0.9, 1.1), per_channel=True),
-            #GaussNoise(var_limit=(1.0, 5.0), per_channel=True)
+            GaussNoise(var_limit=(1.0, 5.0), per_channel=True)
         ], p=color_aug_prob),
     ], 
         p=p, 
