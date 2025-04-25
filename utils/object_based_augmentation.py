@@ -408,8 +408,8 @@ class Generator:
         if self.augm and not self.flag_as_augm:
             image, mask = self._augment_image_mask(image, mask)
 
-        self.visualize(background[5], init_mask)
-        self.visualize(image[5], mask)
+        # self.visualize(background[5], init_mask)
+        # self.visualize(image[5], mask)
         return image, mask
 
 

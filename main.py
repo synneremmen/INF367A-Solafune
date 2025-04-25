@@ -34,15 +34,15 @@ def main(model_selection=False, subset=False, use_OB=False):
     if use_OB:
         print("Using OB dataset")
         dataset = create_OBA_dataset(
-            prob_of_OBA=0.5,
-            subset=False,
+            prob_of_OBA=0.5, # how much OBA data to generate
+            subset=True,
             augm=True,
-            object_augm=False,
-            extra_background_prob=0,
-            background_augm_prob=0,
-            shadows=False,
+            object_augm=True,
+            extra_background_prob=0, # not in use
+            background_augm_prob=0.6,
+            shadows=False, # not to be used
             extra_objects=3,
-            object_augm_prob=0,
+            object_augm_prob=0.6,
             augm_prob=0.8,
             geometric_augm_prob=0.6,
             color_augm_prob=0.6,
@@ -125,4 +125,4 @@ def main(model_selection=False, subset=False, use_OB=False):
         print("\n\nEvaluation completed.\n\n")
 
 if __name__ == "__main__":
-    main(model_selection=True, subset=True)
+    main(model_selection=True, subset=True, use_OB=True)
