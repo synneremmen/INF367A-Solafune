@@ -8,23 +8,14 @@ class UNetResNet18(nn.Module):
         # Load ResNet18 model
         self.encoder = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
 
-        # if we want to freeze all layers
-        # for param in self.encoder.parameters():
-        #    param.requires_grad = False
+        #if we want to freeze all layers in the encoder
+        for param in self.encoder.parameters():
+           param.requires_grad = False
 
-        # Freeze early layers
-        for param in self.encoder.conv1.parameters():
-            param.requires_grad = False  # Freeze initial conv layer
-
-        for param in self.encoder.bn1.parameters():
-            param.requires_grad = False  # Freeze first batch norm
-
-        for param in self.encoder.layer1.parameters():
-            param.requires_grad = False  # Freeze first ResNet block
-        
         # Modify first conv layer to accept 12 input channels
         self.encoder.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=1, padding=3, bias=False)
-        #self.encoder.maxpool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
+        for param in self.encoder.conv1.parameters():
+            param.requires_grad = True
         
         # Decoder (simple upsampling with convolutional layers)
         self.up1 = nn.ConvTranspose2d(512, 256, kernel_size=2, stride=2)
@@ -73,5 +64,7 @@ class UNetResNet18(nn.Module):
         return out
 
 # model = UNetResNet18(num_classes=5)
-# total_params = sum(p.numel() for p in model.parameters())
-# print(f'Total number of parameters to train: {total_params}')
+# trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+# print(f'Total number of trainable parameters: {trainable_params}')
+
+# Total number of trainable parameters: 1 518 437

@@ -176,7 +176,8 @@ cython_debug/
 /train_images
 /data
 /loaded
-/models
 
 # custom project files
 satmae_pp-main/
+playground.ipynb
+/models
