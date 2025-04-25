@@ -1,4 +1,4 @@
-from utils.object_based_augmentation import create_OBA_dataset
+from utils.OBA.object_based_augmentation import create_OBA_dataset
 from utils.preprocessing import get_processed_data
 from utils.evaluation import run_evaluation
 from train.train import train
