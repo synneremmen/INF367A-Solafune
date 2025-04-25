@@ -16,7 +16,8 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.set_default_dtype(torch.double)
 
 # model path
-MODEL_PATH = "models/saved_model.pth"
+MODEL_PATH = "models/SimpleConvNet_paramset_0.1_0.01_0.9.pth"
+
 
 def main(model_selection=False, subset=False, use_OB=False):
     """
@@ -32,7 +33,7 @@ def main(model_selection=False, subset=False, use_OB=False):
 
     print("\n\nLoading data...")
     if use_OB:
-        print("Using OB dataset")
+        print("Using OBA dataset")
         dataset = create_OBA_dataset(
             prob_of_OBA=0.5, # how much OBA data to generate
             subset=True,
@@ -52,6 +53,7 @@ def main(model_selection=False, subset=False, use_OB=False):
         
     else:
         dataset = get_processed_data(subset=subset)
+
     train_loader, val_loader, test_loader = get_loader(dataset, batch_size=6)
     print("Size of training dataset: ", len(train_loader.dataset))
     print("Size of validation dataset: ", len(val_loader.dataset))
@@ -75,8 +77,8 @@ def main(model_selection=False, subset=False, use_OB=False):
             }
             models = {
                 "SimpleConvNet": SimpleConvNet,
-                 "UNet": UNet,
-                 "UNetResNet18": UNetResNet18,
+                "UNet": UNet,
+                "UNetResNet18": UNetResNet18,
             }
 
             print("\n\nTraining model selection...")
@@ -92,9 +94,7 @@ def main(model_selection=False, subset=False, use_OB=False):
                 patience=5,  # early stopping if it doesn't improve for 5 epochs
             )
         
-            print("\n\nRunning evaluation...")
-            torch.cuda.empty_cache()
-            run_evaluation(best_model, test_loader, device=DEVICE)
+            model = best_model
 
         else: # train a model
             print("\n\nTraining model...")
@@ -118,9 +118,9 @@ def main(model_selection=False, subset=False, use_OB=False):
             print("\n\nSaving model...")
             torch.save(model.state_dict(), MODEL_PATH)
 
-            print("\n\nRunning evaluation...")
-            torch.cuda.empty_cache()
-            run_evaluation(model, test_loader, device=DEVICE)
+        print("\n\nRunning evaluation...")
+        torch.cuda.empty_cache()
+        run_evaluation(model, test_loader, device=DEVICE)
 
         print("\n\nEvaluation completed.\n\n")
 
