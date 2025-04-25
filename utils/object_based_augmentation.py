@@ -234,10 +234,7 @@ class Generator:
         num_of_objects = 0
 
         if self.extra_objects > 0:
-            random_num = random.randint(0, self.extra_objects)
-            print(f"Random number of objects: {random_num}")
-
-            for _ in range(random_num):
+            for _ in range(random.randint(0, self.extra_objects)):
                 intersection = True
                 iteration = 0
 
@@ -301,7 +298,6 @@ class Generator:
                     num_of_objects += 1
                     intersection = False
 
-            print(f"Added {num_of_objects} objects")
             temp_mask = np.where(mask > 0, 0, temp_mask)
         return temp_image, temp_mask  # returns image and mask of cropped objects
 
