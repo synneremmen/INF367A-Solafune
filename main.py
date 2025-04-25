@@ -93,7 +93,6 @@ def main(model_selection=False, subset=False, use_OB=False):
                 early_stopping=True, 
                 patience=5,  # early stopping if it doesn't improve for 5 epochs
             )
-        
             model = best_model
 
         else: # train a model
@@ -115,8 +114,8 @@ def main(model_selection=False, subset=False, use_OB=False):
             print("\n\nTraining completed. Training losses:")
             print(losses_train)
 
-            print("\n\nSaving model...")
-            torch.save(model.state_dict(), MODEL_PATH)
+    print("\n\nSaving model...")
+    torch.save(model.state_dict(), MODEL_PATH)
 
     print("\n\nRunning evaluation...")
     torch.cuda.empty_cache()

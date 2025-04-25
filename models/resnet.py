@@ -66,3 +66,5 @@ class UNetResNet18(nn.Module):
 # model = UNetResNet18(num_classes=5)
 # trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 # print(f'Total number of trainable parameters: {trainable_params}')
+
+# Total number of trainable parameters: 1 518 437
