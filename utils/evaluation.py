@@ -36,6 +36,7 @@ def run_evaluation(model, loader, device, save=False, filename="output.json"):
     print("F1:",score["Overall"]["F1"])
     print("Precision:",score["Overall"]["Precision"])
     print("Recall:",score["Overall"]["Recall"])
+    return score
 
 def f1_from_polygons(pred_polygons_list, gt_polygons_list, iou_threshold=0.5):
     print("Length of pred and gt polygons:")
