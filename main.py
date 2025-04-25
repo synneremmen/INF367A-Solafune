@@ -120,9 +120,9 @@ def main(model_selection=False, subset=False, use_OB=False):
 
     print("\n\nRunning evaluation...")
     torch.cuda.empty_cache()
-    run_evaluation(model, test_loader, device=DEVICE)
+    run_evaluation(model, test_loader, device=DEVICE, save=True, filename=f"output_{str(model).split('(')[0]}.json")
 
     print("\n\nEvaluation completed.\n\n")
 
 if __name__ == "__main__":
-    main(model_selection=True, subset=True, use_OB=True)
+    main(model_selection=True, subset=True, use_OB=False)
