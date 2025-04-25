@@ -62,33 +62,30 @@ class Generator:
         self.num_of_extracted_objects = len(self.extracted_objects)
 
 
-    def visualize(self, image, mask=None, original_image=None, original_mask=None):
+    def visualize(self, image, mask=None):
+        """
+        Visualizes the image and mask.
+        Args:
+            image (numpy.ndarray): The image to visualize.
+            mask (numpy.ndarray): The mask to visualize.
+            original_image (numpy.ndarray): The original image to visualize.
+            original_mask (numpy.ndarray): The original mask to visualize.
+        """
         fontsize = 18
 
-        if original_image is None and original_mask is None:
-            f, ax = plt.subplots(2, 1, figsize=(8, 8))
-
-            ax[0].imshow(image)
-            ax[1].imshow(mask)
-
-        elif mask is None:
+        if mask is None:
             f, ax = plt.subplots(1, 1, figsize=(8, 8))
             ax.imshow(image)
             
         else:
-            f, ax = plt.subplots(2, 2, figsize=(8, 8))
+            f, ax = plt.subplots(2, 1, figsize=(8, 8))
 
-            ax[0, 0].imshow(original_image)
-            ax[0, 0].set_title('Image band 5', fontsize=fontsize)
+            ax[0, 0].imshow(image)
+            ax[0, 0].set_title('Image', fontsize=fontsize)
 
-            ax[1, 0].imshow(original_mask)
+            ax[1, 0].imshow(mask)
             ax[1, 0].set_title('Mask', fontsize=fontsize)
 
-            ax[0, 1].imshow(image)
-            ax[0, 1].set_title('Image band 2', fontsize=fontsize)
-
-            ax[1, 1].imshow(mask)
-            ax[1, 1].set_title('Cropped mask', fontsize=fontsize)
         plt.show()
 
 
@@ -183,7 +180,7 @@ class Generator:
         # find the background
         # -------------------------------------------------------------------
         background, mask, rnd_choice = self._find_background()
-        self.visualize(background[2], mask, background[5], mask)
+        self.visualize(background[2], mask)
         background, mask = self._prepare_image_and_mask(background, mask)
 
         if random.random() < self.background_augm_prob and self.augm_seperately:
@@ -196,7 +193,6 @@ class Generator:
         if self.object_augm:
             print("Object-based augmentation")
             objects_image, objects_mask = self._apply_object_augmentation(rnd_choice, background, mask)
-            #self.visualize(objects_image[2], objects_mask, background[5], mask)
             image, mask = self._insert_objects_to_background(objects_image, objects_mask, background, mask)
 
             # -------------------------------------------------------------------
@@ -308,9 +304,9 @@ class Generator:
 
         shadow = (shifted_mask > 0) & (mask == 0)
         
-        plt.title("Shadow mask")
-        plt.imshow(shadow)
-        plt.show()
+        # plt.title("Shadow mask")
+        # plt.imshow(shadow)
+        # plt.show()
 
         alpha = random.choice([0.4, 0.5]) #([0.3, 0.4, 0.45])
         for idx, _ in enumerate(self.channels_background):
@@ -377,7 +373,7 @@ def create_OBA_dataset(
             sample_mask = sample_mask[np.newaxis, ...]  # get correct dimensions (should be (1, 1024, 1024))
             x_train_dict.update({f"OBA_{num}": {"image": sample_image}})
             y_train_dict.update({f"OBA_{num}": {"image": sample_mask}})
-            generator.visualize(sample_image[2], sample_mask[0], sample_image[5], sample_mask[0])
+            generator.visualize(sample_image[2], sample_mask[0])
 
     x_train = [torch.tensor(each['image']) for each in x_train_dict.values()]
     y_train = [torch.tensor(each['image']) for each in y_train_dict.values()]
