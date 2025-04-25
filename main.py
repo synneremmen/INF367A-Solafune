@@ -1,23 +1,25 @@
+from utils.OBA.object_based_augmentation import create_OBA_dataset
 from utils.preprocessing import get_processed_data
+from utils.evaluation import run_evaluation
 from train.train import train
-import torch
+from train.loader import get_loader
+from train.selection import train_model_selection
 from models.simple_convnet import SimpleConvNet
 from models.UNet import UNet
 from models.resnet import UNetResNet18
+import torch
 import torch.nn as nn
-from train.loader import get_loader
-from train.selection import train_model_selection
-from utils.evaluation import run_evaluation
-import os
 from torch.optim.lr_scheduler import StepLR
+import os
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.set_default_dtype(torch.double)
 
 # model path
-MODEL_PATH = "models/saved_model.pth"
+MODEL_PATH = "models/SimpleConvNet_paramset_0.1_0.01_0.9.pth"
 
-def main(model_selection=False, subset=False):
+
+def main(model_selection=False, subset=False, use_OB=False):
     """
     Main function to train and evaluate the model.
     Args:
@@ -30,7 +32,28 @@ def main(model_selection=False, subset=False):
     )  # SimpleConvNet().to(DEVICE) # UNet().to(DEVICE) # UNetResNet18().to(DEVICE)
 
     print("\n\nLoading data...")
-    dataset = get_processed_data(subset=subset)
+    if use_OB:
+        print("Using OBA dataset")
+        dataset = create_OBA_dataset(
+            prob_of_OBA=0.5, # how much OBA data to generate
+            subset=True,
+            augm=True,
+            object_augm=True,
+            extra_background_prob=0, # not in use
+            background_augm_prob=0.6,
+            shadows=False, # not to be used
+            extra_objects=3,
+            object_augm_prob=0.6,
+            augm_prob=0.8,
+            geometric_augm_prob=0.6,
+            color_augm_prob=0.6,
+            batch_size=10,
+            min_area=1000,
+        )
+        
+    else:
+        dataset = get_processed_data(subset=subset)
+
     train_loader, val_loader, test_loader = get_loader(dataset, batch_size=6)
     print("Size of training dataset: ", len(train_loader.dataset))
     print("Size of validation dataset: ", len(val_loader.dataset))
@@ -54,8 +77,8 @@ def main(model_selection=False, subset=False):
             }
             models = {
                 "SimpleConvNet": SimpleConvNet,
-                 "UNet": UNet,
-                 "UNetResNet18": UNetResNet18,
+                "UNet": UNet,
+                "UNetResNet18": UNetResNet18,
             }
 
             print("\n\nTraining model selection...")
@@ -70,7 +93,6 @@ def main(model_selection=False, subset=False):
                 early_stopping=True, 
                 patience=5,  # early stopping if it doesn't improve for 5 epochs
             )
-
             model = best_model
 
         else: # train a model
@@ -97,9 +119,9 @@ def main(model_selection=False, subset=False):
 
     print("\n\nRunning evaluation...")
     torch.cuda.empty_cache()
-    run_evaluation(model, test_loader, device=DEVICE)
+    run_evaluation(model, test_loader, device=DEVICE, save=True, filename=f"output_{str(model).split('(')[0]}.json")
 
     print("\n\nEvaluation completed.\n\n")
 
 if __name__ == "__main__":
-    main(model_selection=True, subset=True)
+    main(model_selection=True, subset=True, use_OB=False)
