@@ -91,7 +91,6 @@ class Generator:
         Returns:
             list: A list of tuples containing image names, masks, and object IDs.
         """
-        # load labels with masks for each objects
         labels = load_labels(subset=subset, object_based_augmentation=True)
         
         if images is None:
@@ -204,7 +203,6 @@ class Generator:
         num_of_objects = 0
 
         if self.extra_objects > 0:
-            print("Adding extra objects")
             random_num = random.randint(0, self.extra_objects)
             print(f"Random number of objects: {random_num}")
             for _ in range(random_num):
@@ -327,7 +325,6 @@ class Generator:
         # object-based augmentation
         # -------------------------------------------------------------------
         if self.object_augm:
-            print("Object-based augmentation")
             objects_image, objects_mask = self._apply_object_augmentation(rnd_choice, background, mask)
             image, mask = self._insert_objects_to_background(objects_image, objects_mask, background, mask)
 
@@ -335,14 +332,12 @@ class Generator:
             # add shadows
             # -------------------------------------------------------------------
             if self.shadows:
-                print("Adding shadows")
                 objects_image = self._add_shadows(image, objects_mask)
 
         # -------------------------------------------------------------------
         # base augmentation (if no object-based augmentation)
         # -------------------------------------------------------------------
         if self.base_augm and not self.flag_object_augm:
-            print("Base augmentation")
             image, mask = self._augment_image_mask(background, mask)
 
         # -------------------------------------------------------------------
