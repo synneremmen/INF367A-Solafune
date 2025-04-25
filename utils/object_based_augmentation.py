@@ -426,10 +426,10 @@ def create_OBA_dataset(
     shadows=False,
     extra_objects=3,
     object_augm_prob=0,
-    augm_prob=0.9,
+    augm_prob=0.8,
     geometric_augm_prob=0.6,
-    color_augm_prob=0,
-    batch_size=1,
+    color_augm_prob=0.6,
+    batch_size=10,
     min_area=1000,
 ) -> TensorDataset:
     """
