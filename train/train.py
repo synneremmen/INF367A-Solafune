@@ -88,4 +88,4 @@ def train(n_epochs, optimizer, model, loss_fn, train_loader, device, val_loader=
             print(f'Learning rate updated: {optimizer.param_groups[0]["lr"]:.6f}')
         print()
 
-    return losses_train#, losses_val
+    return losses_train, losses_val

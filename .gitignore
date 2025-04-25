@@ -176,4 +176,7 @@ cython_debug/
 /train_images
 /data
 /loaded
-/superresolved_images
+/models
+
+# custom project files
+satmae_pp-main/

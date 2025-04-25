@@ -34,11 +34,10 @@ def outputs_to_polygons(outputs, min_area=1000, threshold=0.5):
 
 def labels_to_polygons(loader, device="cpu"):
     polygons = []
-    
     with torch.inference_mode():
-        for batch in loader:
+        for images, labels in loader:
             # Assuming labels are in batch[1], modify this if needed
-            true_labels = batch[1].to(device)  # Move to the correct device
+            true_labels = labels.to(device)  # Move to the correct device
 
             # Ensure labels are detached from computation graph and converted to numpy
             true_labels = true_labels.cpu().numpy()  # Shape (B, H, W)
@@ -68,7 +67,7 @@ def labels_to_polygons(loader, device="cpu"):
 
 
 
-def polygons_to_json(polygons_by_class, file_name="evaluation"):
+def polygons_to_json(polygons_by_class, file_name="train"):
 
     json_dict = {
         "images": [
