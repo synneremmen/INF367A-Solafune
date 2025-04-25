@@ -41,7 +41,7 @@ def main(model_selection=False, subset=False):
         model.load_state_dict(torch.load(MODEL_PATH, weights_only=True))
 
     else:
-        loss_fn = nn.CrossEntropyLoss()
+        loss_fn = nn.CrossEntropyLoss(ignore_index=0)
         n_epochs = 30
         
         if model_selection: # perform model selection with hyperparameter search
@@ -70,10 +70,8 @@ def main(model_selection=False, subset=False):
                 early_stopping=True, 
                 patience=5,  # early stopping if it doesn't improve for 5 epochs
             )
-        
-            print("\n\nRunning evaluation...")
-            torch.cuda.empty_cache()
-            run_evaluation(best_model, test_loader, device=DEVICE)
+
+            model = best_model
 
         else: # train a model
             print("\n\nTraining model...")
@@ -94,14 +92,14 @@ def main(model_selection=False, subset=False):
             print("\n\nTraining completed. Training losses:")
             print(losses_train)
 
-            print("\n\nSaving model...")
-            torch.save(model.state_dict(), MODEL_PATH)
+    print("\n\nSaving model...")
+    torch.save(model.state_dict(), MODEL_PATH)
 
-            print("\n\nRunning evaluation...")
-            torch.cuda.empty_cache()
-            run_evaluation(model, test_loader, device=DEVICE)
+    print("\n\nRunning evaluation...")
+    torch.cuda.empty_cache()
+    run_evaluation(model, test_loader, device=DEVICE)
 
-        print("\n\nEvaluation completed.\n\n")
+    print("\n\nEvaluation completed.\n\n")
 
 if __name__ == "__main__":
     main(model_selection=True, subset=True)
