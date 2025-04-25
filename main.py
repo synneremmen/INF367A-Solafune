@@ -118,11 +118,11 @@ def main(model_selection=False, subset=False, use_OB=False):
             print("\n\nSaving model...")
             torch.save(model.state_dict(), MODEL_PATH)
 
-        print("\n\nRunning evaluation...")
-        torch.cuda.empty_cache()
-        run_evaluation(model, test_loader, device=DEVICE)
+    print("\n\nRunning evaluation...")
+    torch.cuda.empty_cache()
+    run_evaluation(model, test_loader, device=DEVICE)
 
-        print("\n\nEvaluation completed.\n\n")
+    print("\n\nEvaluation completed.\n\n")
 
 if __name__ == "__main__":
     main(model_selection=True, subset=True, use_OB=True)
