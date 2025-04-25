@@ -1,9 +1,9 @@
 import torch.nn as nn
 import torchvision.models as models
 
-class UNetResNet18Small(nn.Module):
+class UNetResNet18Large(nn.Module):
     def __init__(self, num_classes=5, in_channels=12):
-        super(UNetResNet18Small, self).__init__()
+        super(UNetResNet18Large, self).__init__()
         
         # Load ResNet18 model
         self.encoder = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
@@ -65,6 +65,8 @@ class UNetResNet18Small(nn.Module):
         
         return out
 
-model = UNetResNet18Small(num_classes=5)
-total_params = sum(p.numel() for p in model.parameters())
-print(f'Total number of parameters to train: {total_params}')
+# model = UNetResNet18Small(num_classes=5)
+# total_params = sum(p.numel() for p in model.parameters())
+# print(f'Total number of parameters to train: {total_params}')
+
+# Total number of parameters to train: 11 908 805
