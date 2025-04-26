@@ -44,6 +44,7 @@ def main(model_selection=False, subset=False):
         print("\n\nRunning evaluation...")
         torch.cuda.empty_cache()
         run_evaluation(model, test_loader, device=DEVICE, save=False)
+        print("\n\nEvaluation completed of saved model.\n\n")
 
     elif model_selection:
         # perform model selection with hyperparameter search on different models and/or with different datasets
@@ -96,6 +97,7 @@ def main(model_selection=False, subset=False):
             print("\n\nRunning evaluation...")
             torch.cuda.empty_cache()
             run_evaluation(best_model, test_loader, device=DEVICE, save=False)
+            print("\n\nModel selection and evaluation completed.\n\n")
 
     else: # train a single model
         print("\n\nTraining model...")
@@ -106,6 +108,12 @@ def main(model_selection=False, subset=False):
 
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001) 
         scheduler = StepLR(optimizer, step_size=10, gamma=0.1, verbose=False)
+        dataset = get_dataset("normal", subset=subset)
+
+        train_loader, val_loader, test_loader = get_loader(dataset, batch_size=batch_size)
+        print("Size of training dataset: ", len(train_loader.dataset))
+        print("Size of validation dataset: ", len(val_loader.dataset))
+        print("Size of test dataset: ", len(test_loader.dataset))
 
         losses_train = train(
             n_epochs,
@@ -126,8 +134,7 @@ def main(model_selection=False, subset=False):
         print("\n\nRunning evaluation...")
         torch.cuda.empty_cache()
         run_evaluation(model, test_loader, device=DEVICE, save=True)
-
-    print("\n\nEvaluation completed.\n\n")
+        print("\n\Training and evaluation completed.\n\n")
 
 if __name__ == "__main__":
     main(model_selection=True, subset=True)
