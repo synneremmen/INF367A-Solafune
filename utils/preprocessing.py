@@ -3,8 +3,8 @@ import torch
 from utils.normalize import normalize
 from utils.loading import load_images, load_masked_images
 
-def get_processed_data(subset=False):
-    x_train_dict = load_images(subset=subset)
+def get_processed_data(subset=False, use_SR=False):
+    x_train_dict = load_images(subset=subset, use_SR=use_SR)
     y_train_dict = load_masked_images(subset=subset)
 
     x_train = [torch.tensor(each['image']) for each in x_train_dict.values()]
@@ -20,7 +20,7 @@ def get_processed_data(subset=False):
 
 
 def get_processed_evaluation_data(subset=False):
-    x_eval_dict = load_images(type="eval",subset=subset)
+    x_eval_dict = load_images(type="eval",subset=subset) # ugyldig, eval er ikke lenger en mulighet
 
     x_eval = [torch.tensor(each['image']) for each in x_eval_dict.values()]
 

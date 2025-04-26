@@ -179,5 +179,3 @@ cython_debug/
 
 # custom project files
 satmae_pp-main/
-playground.ipynb
-/models
