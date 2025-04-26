@@ -215,6 +215,62 @@ def plot_masked_image(filename: str):
         plt.show()
 
 
+def plot_masked_prediction(filename: str, path: str):
+    """
+    Plot predictions for a given image with masked annotations.
+    Args:
+        filename (str): The name of the image file to plot.
+        path (str): The path to the predictions JSON file.
+    """
+    os.chdir(os.path.join(os.path.dirname(__file__), '..'))  # trengs denne?
+    labels = get_json(LABELS_PATH)
+    predictions = get_json(os.path.join(PREDICTIONS_PATH, path))
+    gt_ann = find_annotations(labels, filename)
+    pred_ann = find_annotations(predictions, filename)
+
+    if not (gt_ann and pred_ann):
+        print(f"Missing ground truth or prediction for {filename}")
+        return
+
+    gt_path = os.path.join(MASKED_IMAGES_PATH, filename)
+
+    with rasterio.open(gt_path) as gt_src:
+        gt_mask = gt_src.read(1)
+
+        colors = ['gainsboro', 'forestgreen', 'sienna', 'darkred', 'dodgerblue']
+        cmap = mcolors.ListedColormap(colors)
+
+        fig, ax = plt.subplots(1, 2, figsize=(15, 5))
+
+        # Plot ground truth mask
+        ax[0].imshow(gt_mask, cmap=cmap, vmin=0, vmax=len(class_mapping) - 1)
+        ax[0].axis('off')
+        ax[0].set_title("Ground Truth Mask")
+
+        # Create a blank canvas for predictions
+        pred_canvas = np.zeros_like(gt_mask, dtype=np.uint8)
+
+        # Draw polygons for predictions with class-based colors
+        for poly_data in pred_ann:
+            coords = [(poly_data['segmentation'][i], poly_data['segmentation'][i + 1])
+                      for i in range(0, len(poly_data['segmentation']), 2)]
+            class_id = class_mapping.get(poly_data['class'], 0)
+            color = colors[class_id] if class_id < len(colors) else 'blue'
+            polygon = Polygon(coords, edgecolor=color, lw=2, facecolor=color, alpha=1)
+            ax[1].add_patch(polygon)
+
+        # Plot prediction mask
+        ax[1].imshow(pred_canvas, cmap=cmap, vmin=0, vmax=len(class_mapping) - 1)
+        ax[1].axis('off')
+        ax[1].set_title("Prediction Mask")
+
+        # Add legend
+        patches = [Patch(color=cmap(val), label=label) for label, val in class_mapping.items()]
+        ax[1].legend(handles=patches, bbox_to_anchor=(1, 1), loc='upper left')
+
+        plt.suptitle(f"{filename} - Ground Truth vs Prediction")
+        plt.show()
+
 def plot_prediction(filename: str, path: str, band: int = 1):
     """
     Plot predictions for a given image with annotations.
