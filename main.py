@@ -45,7 +45,8 @@ def main(model_selection=False, subset=False):
             images_dir=IMAGES_PATH,
             masks_dir=MASKED_IMAGES_PATH,
             oba_generator=None,
-            num_workers=4)
+            num_workers=4,
+            batch_size=batch_size)
 
         print("\n\nRunning evaluation...")
         torch.cuda.empty_cache()
@@ -78,7 +79,8 @@ def main(model_selection=False, subset=False):
                 images_dir=image_path,
                 masks_dir=MASKED_IMAGES_PATH,
                 oba_generator=oba_generator,
-                num_workers=4)
+                num_workers=4,
+                batch_size=batch_size)
             # dataset = get_dataset(dataset, subset=subset)
 
             # train_loader, val_loader, test_loader = get_loader(dataset, batch_size=batch_size)
