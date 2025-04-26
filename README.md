@@ -23,7 +23,7 @@ EVAL_IMAGES_SUBSET_PATH = path/to/evaluation/images/subset
 ```
 
 ```plaintext
-SUPERRESOLVED_IMAGES_PATH = path/to/superresolved_images
+SR_IMAGES_PATH = path/to/superresolved_images
 SR_20M_PATH = path/to/superresolution_20m_model
 SR_60M_PATH = path/to/superresolution_60m_model
 ```
