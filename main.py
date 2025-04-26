@@ -34,7 +34,7 @@ def main(model_selection=False, subset=False):
 
         model = SimpleConvNet().to(DEVICE)  # SimpleConvNet().to(DEVICE) # UNet().to(DEVICE) # UNetResNet18().to(DEVICE)
         model.load_state_dict(torch.load(MODEL_PATH, weights_only=True, map_location=DEVICE))
-        dataset = get_dataset("normal", subset=subset)
+        dataset = get_dataset("SR_OBA", subset=subset)
 
         train_loader, val_loader, test_loader = get_loader(dataset, batch_size=batch_size)
         print("Size of training dataset: ", len(train_loader.dataset))
@@ -134,7 +134,7 @@ def main(model_selection=False, subset=False):
         print("\n\nRunning evaluation...")
         torch.cuda.empty_cache()
         run_evaluation(model, test_loader, device=DEVICE, save=True)
-        print("\n\Training and evaluation completed.\n\n")
+        print("\nTraining and evaluation completed.\n\n")
 
 if __name__ == "__main__":
     main(model_selection=True, subset=True)
