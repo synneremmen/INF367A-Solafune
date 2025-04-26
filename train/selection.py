@@ -47,9 +47,12 @@ def train_model_selection(models, param_grid, n_epochs, loss_fn, train_loader, v
             # train the model
             print(f"\n\nTraining {name} with param set {idx}: lr={lr}, decay={decay}, mom={mom}")
             train_losses, val_losses = train(model, optimizer, loss_fn, train_loader, val_loader, device, n_epochs, scheduler, early_stopping=early_stopping, patience=patience)
-            val_score = run_evaluation(model, val_loader, device, save=False)
 
-            print(f"Model: {name}, Param set {idx}, Validation score: {val_score}")
+            result_dict = run_evaluation(model, val_loader, device, save=False)
+            val_score = result_dict["Overall"]["F1"]  # Only take Overall F1 score
+
+            print(f"Model: {name}, Param set {idx}, Validation score (F1): {val_score}")
+
             print("=" * 50)
 
             print("\n\nSaving model...")
