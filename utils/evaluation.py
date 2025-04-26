@@ -19,7 +19,7 @@ def run_evaluation(model, loader, device, save=False, filename=None):
             image_tensor = image.to(device)
             outputs = model(image_tensor)
 
-            model_outputs.append(outputs)
+            model_outputs.append(torch.softmax(outputs, dim=1))
             true_labels.append(label)
 
     model_outputs = torch.cat(model_outputs, dim=0)
