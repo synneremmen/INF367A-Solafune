@@ -43,6 +43,7 @@ def train_model_selection(models, param_grid, n_epochs, loss_fn, train_loader, v
 
             # instantiate the model and optimizer
             model = model_fn().to(device)
+            model.float()
             optimizer = optim.Adam(model.parameters(), lr=lr, betas=(mom, 0.999), weight_decay=decay)
             scheduler = StepLR(optimizer, step_size=10, gamma=0.1, verbose=False)
 
