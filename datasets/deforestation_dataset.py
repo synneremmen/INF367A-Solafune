@@ -7,6 +7,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import rasterio
 from torchvision.transforms import Normalize
+import random
 
 
 Sample = Tuple[str, str]
@@ -49,13 +50,16 @@ def compute_stats(samples: List[Sample],
     return mean, std
 
 
+
 class DeforestationDataset(Dataset):
     """
     PyTorch Dataset for deforestation segmentation
     """
-    def __init__(self, samples: List[Sample], normalize: Normalize):
+    def __init__(self, samples: List[Sample], oba_generator, normalizer: Normalize):
         self.samples   = samples
-        self.normalize = normalize
+        self.oba_generator = oba_generator
+        self.normalizer = normalizer
+        self.p_aug     = 0.5
 
     def __len__(self) -> int:
         return len(self.samples)
@@ -68,19 +72,24 @@ class DeforestationDataset(Dataset):
         with rasterio.open(mask_path) as src:
             mask = src.read(1).astype(np.int64)
 
+        if self.oba_generator is not None and random.random() < self.p_aug:
+            img, mask = self.oba_generator.generate_augmented_sample()
+
         img = np.nan_to_num(img, 0.0)
         img_t = torch.from_numpy(img)
-        img_t = self.normalize(img_t)
+        img_t = self.normalizer(img_t)
 
         mask_t = torch.from_numpy(mask)
 
         return img_t, mask_t
 
 
+
 def build_datasets(images_dir: str,
                    masks_dir:  str,
                    train_ratio: float = 0.8,
                    test_ratio:  float = 0.1,
+                   oba_generator: object = None,
                    seed:        int   = 42,
                    batch_size:  int   = 8,
                    num_workers: int   = 4,
@@ -101,11 +110,11 @@ def build_datasets(images_dir: str,
     test   = [samples[i] for i in perm[n_train + n_val:]]
 
     mean, std = compute_stats(train, stats_path)
-    normalize = Normalize(mean=mean, std=std)
+    normalizer = Normalize(mean=mean, std=std)
 
-    train_ds = DeforestationDataset(train, normalize)
-    val_ds   = DeforestationDataset(val,   normalize)
-    test_ds  = DeforestationDataset(test,  normalize)
+    train_ds = DeforestationDataset(train, oba_generator, normalizer)
+    val_ds   = DeforestationDataset(val, oba_generator,  normalizer)
+    test_ds  = DeforestationDataset(test, oba_generator, normalizer)
 
     train_loader = DataLoader(train_ds, batch_size=batch_size,
                               shuffle=True,  num_workers=num_workers, pin_memory=True)

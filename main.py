@@ -12,9 +12,13 @@ import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR
 import os
 from datasets.deforestation_dataset import build_datasets
+from utils.OBA.object_based_augmentation import Generator
+import sys
+import subprocess
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.set_default_dtype(torch.double)
+
 
 
 def main(model_selection=False, subset=False):
@@ -26,8 +30,8 @@ def main(model_selection=False, subset=False):
     """
     loss_fn = nn.CrossEntropyLoss(ignore_index=0)
     n_epochs = 30
-    batch_size = 6
-    MODEL_PATH = "models/SimpleConvNet_paramset_0.01_0.01_0.9.pth"
+    batch_size = 16
+    MODEL_PATH = None# "models/SimpleConvNet_paramset_0.01_0.01_0.9.pth"
 
     if MODEL_PATH and os.path.exists(MODEL_PATH):
         # use saved model if it exists
@@ -49,11 +53,35 @@ def main(model_selection=False, subset=False):
 
     elif model_selection:
         # perform model selection with hyperparameter search on different models and/or with different datasets
-        for dataset in ["normal", "OBA", "SR", "SR_OBA"]:
+        for dataset in ["SR"]: #["normal", "OBA", "SR", "SR_OBA"]:
             print(f"\n\nModel selection on {dataset} dataset...")
-            dataset = get_dataset(dataset, subset=subset)
+            
+            mask_path = os.getenv("MASKED_IMAGES_PATH")
+            if dataset == "SR" or dataset == "SR_OBA":
+                image_path = os.getenv("SR_IMAGES_PATH")
+                if not os.path.exists(image_path):
+                    sr_script = os.path.join(
+                        os.path.dirname(__file__),
+                        "utils",
+                        "superresolution.py"
+                    )
+                    subprocess.run([sys.executable, sr_script], check=True)
 
-            train_loader, val_loader, test_loader = get_loader(dataset, batch_size=batch_size)
+            else:
+                image_path = os.getenv("IMAGES_PATH")
+
+            oba_generator = None
+            if dataset == "OBA" or dataset == "SR_OBA":
+                oba_generator = Generator(batch_size=batch_size)
+
+            train_loader, val_loader, test_loader = build_datasets(
+                images_dir=image_path,
+                masks_dir=mask_path,
+                oba_generator=oba_generator,
+                num_workers=4)
+            # dataset = get_dataset(dataset, subset=subset)
+
+            # train_loader, val_loader, test_loader = get_loader(dataset, batch_size=batch_size)
             print("Size of training dataset: ", len(train_loader.dataset))
             print("Size of validation dataset: ", len(val_loader.dataset))
             print("Size of test dataset: ", len(test_loader.dataset))
@@ -138,4 +166,4 @@ def main(model_selection=False, subset=False):
         print("\nTraining and evaluation completed.\n\n")
 
 if __name__ == "__main__":
-    main(model_selection=True, subset=True)
+    main(model_selection=True, subset=False)
