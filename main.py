@@ -5,6 +5,7 @@ from train.selection import train_model_selection
 from models.simple_convnet import SimpleConvNet
 from models.UNet import UNet
 from models.resnet import UNetResNet18
+from models.vit_large import vit_seg_large_patch16
 import torch
 import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR
@@ -32,7 +33,7 @@ def main(model_selection=False, subset=False):
     loss_fn = nn.CrossEntropyLoss(ignore_index=0)
     n_epochs = 30
     batch_size = 16
-    MODEL_PATH = "models/SimpleConvNet_paramset_0.001_0.01_0.9.pth"
+    MODEL_PATH = None #"models/SimpleConvNet_paramset_0.001_0.01_0.9.pth"
 
     if MODEL_PATH and os.path.exists(MODEL_PATH):
         # use saved model if it exists
@@ -55,7 +56,7 @@ def main(model_selection=False, subset=False):
 
     elif model_selection:
         # perform model selection with hyperparameter search on different models and/or with different datasets
-        for dataset in ["SR"]: #["normal", "OBA", "SR", "SR_OBA"]:
+        for dataset in ["normal", "OBA", "SR", "SR_OBA"]:
             print(f"\n\nModel selection on {dataset} dataset...")
             
             if dataset == "SR" or dataset == "SR_OBA":
@@ -73,7 +74,9 @@ def main(model_selection=False, subset=False):
 
             oba_generator = None
             if dataset == "OBA" or dataset == "SR_OBA":
+                print("Using OBA generator for augmentation...")
                 oba_generator = Generator(batch_size=batch_size)
+                print("Finished creating OBA generator...")
 
             train_loader, val_loader, test_loader = build_datasets(
                 images_dir=image_path,
@@ -94,22 +97,25 @@ def main(model_selection=False, subset=False):
             #     'decay': [0.01, 0.001],
             #     'mom': [0.9, 0.99],
             # }
-            # models = {
-            #     "SimpleConvNet": SimpleConvNet,
-            #     "UNet": UNet,
-            #     "UNetResNet18": UNetResNet18,
-            # }
+            models = {
+                # "SimpleConvNet": SimpleConvNet,
+                # "UNet": UNet,
+                # "UNetResNet18": UNetResNet18,
+                "ViT-finetune": vit_seg_large_patch16(
+                    img_size=512,
+                    num_classes=5,
+                    patch_size=16,
+                    in_chans=12,
+                    ckpt_path="checkpoint_ViT-L_pretrain_fmow_sentinel.pth",
+                    n_trainable_layers=4,
+                ),
+            }
 
             # For testing
             param_grid = {
                 'lr': [0.001],
                 'decay': [0.01],
                 'mom': [0.9],
-            }
-            models = {
-                "SimpleConvNet": SimpleConvNet,
-                # "UNet": UNet,
-                # "UNetResNet18": UNetResNet18,
             }
 
             print("\n\nTraining model selection...")
@@ -124,6 +130,8 @@ def main(model_selection=False, subset=False):
                 early_stopping=True, 
                 patience=5,  # early stopping if it doesn't improve for 5 epochs
             )
+
+            print("\n\nBest model: ", best_model_name)
 
             print("\n\nRunning evaluation...")
             torch.cuda.empty_cache()

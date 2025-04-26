@@ -12,6 +12,7 @@ from utils.normalize import normalize
 from utils.OBA.augmentation import augment
 from utils.loading import load_images, load_labels, load_masked_images
 from dotenv import load_dotenv
+from datasets.deforestation_dataset import DeforestationDataset, build_samples
 
 load_dotenv()
 IMAGES_PATH = os.getenv("IMAGES_PATH")
@@ -114,37 +115,42 @@ class Generator:
         """
         labels = load_labels(subset=subset, object_based_augmentation=True)
 
-        if images is None:
-            images = load_images(subset=subset)
+        samples = build_samples(
+            images_dir=os.getenv("MASKED_IMAGES_PATH"),
+            masks_dir=os.getenv("MASKED_IMAGES_PATH"),
+
+        )
 
         all_object_masks = []
+        for img_path, _ in samples:
+            image_name = os.path.basename(img_path)
+            if image_name not in labels:
+                continue  # no annotated polygons for this image
 
-        for image_name, label in labels.items():
-            image = images[image_name]["image"]
-            profile = images[image_name]["profile"]
-            height, width = profile["height"], profile["width"]
-            transform = Affine.identity()
+            with rasterio.open(img_path) as src:
+                image     = src.read().astype(np.float32)  # (C, H, W)
+                height, width = src.height, src.width
+                transform    = Affine.identity()
 
-            for annotation, obj_id in label:
-                class_label = annotation["class"]
-                class_value = self.class_mapping[class_label]
-                coords = annotation["segmentation"]
-                polygon_coords = [
-                    (coords[i], coords[i + 1]) for i in range(0, len(coords), 2)
-                ]
-                polygon = Polygon(polygon_coords)
+            for annotation, obj_id in labels[image_name]:
+                class_value = self.class_mapping[annotation["class"]]
+                coords      = annotation["segmentation"]
+                poly_coords = [(coords[i], coords[i+1]) for i in range(0, len(coords), 2)]
+                poly        = Polygon(poly_coords)
 
-                if polygon.area > min_area and polygon.is_valid:
-                    mask = rasterize(
-                        [(polygon, class_value)],
-                        out_shape=(height, width),
-                        transform=transform,
-                        fill=0,
-                    )
+                if not poly.is_valid or poly.area < min_area:
+                    continue
 
-                    all_object_masks.append((image_name, image, mask, obj_id))
+                mask = rasterize(
+                    [(poly, class_value)],
+                    out_shape=(height, width),
+                    transform=transform,
+                    fill=0,
+                )
 
-        print(f"Extracted {len(all_object_masks)} objects from {len(images)} images.")
+                all_object_masks.append((image_name, image, mask, obj_id))
+
+        print(f"Extracted {len(all_object_masks)} objects from {len(samples)} files.")
         return all_object_masks
 
     def _crop_target_object(self, object_id: int):

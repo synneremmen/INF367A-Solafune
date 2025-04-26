@@ -179,3 +179,5 @@ cython_debug/
 
 # custom project files
 satmae_pp-main/
+
+checkpoint_ViT-L_pretrain_fmow_sentinel.pth

@@ -55,7 +55,7 @@ class DeforestationDataset(Dataset):
     """
     PyTorch Dataset for deforestation segmentation
     """
-    def __init__(self, samples: List[Sample], oba_generator, normalizer: Normalize):
+    def __init__(self, samples: List[Sample], oba_generator=None, normalizer=None):
         self.samples   = samples
         self.oba_generator = oba_generator
         self.normalizer = normalizer
@@ -76,13 +76,14 @@ class DeforestationDataset(Dataset):
             img, mask = self.oba_generator.generate_augmented_sample()
 
         img = np.nan_to_num(img, 0.0)
-        img_t = torch.from_numpy(img)
-        img_t = self.normalizer(img_t)
+        img_t = torch.from_numpy(img).float()
 
-        mask_t = torch.from_numpy(mask)
+        if self.normalizer is not None:
+            img_t = self.normalizer(img_t)
+
+        mask_t = torch.from_numpy(mask).long()
 
         return img_t, mask_t
-
 
 
 def build_datasets(images_dir: str,
@@ -94,7 +95,7 @@ def build_datasets(images_dir: str,
                    batch_size:  int   = 8,
                    num_workers: int   = 4,
                    stats_path:  str   = "stats.npz"
-                  ):
+                  )-> Tuple[DataLoader, DataLoader, DataLoader]:
     """
     Builds dataloaders for training, validation, and testing
     """
