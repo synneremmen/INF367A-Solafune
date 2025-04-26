@@ -427,6 +427,7 @@ def create_OBA_dataset(
     color_augm_prob=0.6,
     batch_size=10,
     min_area=1000,
+    use_SR=False,
 ) -> TensorDataset:
     """
     Create a dataset with object-based augmentation (OBA) samples.
@@ -449,7 +450,7 @@ def create_OBA_dataset(
         TensorDataset: A dataset containing the augmented samples.
     """
 
-    x_train_dict = load_images(subset=subset)
+    x_train_dict = load_images(subset=subset, use_SR=use_SR)
     y_train_dict = load_masked_images(subset=subset)
 
     generator = Generator(

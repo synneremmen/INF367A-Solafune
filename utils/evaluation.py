@@ -5,7 +5,10 @@ import numpy as np
 
 class_names = ['plantation', 'logging', 'mining', 'grassland_shrubland']
 
-def run_evaluation(model, loader, device, save=False, filename="output.json"):
+def run_evaluation(model, loader, device, save=False, filename=None):
+    if filename is None and save:
+        filename=f"output_{str(model).split('(')[0]}.json"
+
     model.to(device) # Ensure model is on the correct device
     model_outputs = []  # Store model outputs
     true_labels = []  # Store true labels

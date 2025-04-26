@@ -14,7 +14,7 @@ IMAGES_SUBSET_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os
 MASKED_IMAGES_SUBSET_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.getenv("MASKED_IMAGES_SUBSET_PATH")) 
 EVAL_IMAGES_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.getenv("EVAL_IMAGES_PATH"))
 EVAL_IMAGES_SUBSET_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.getenv("EVAL_IMAGES_SUBSET_PATH"))
-
+SR_IMAGES_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.getenv("SR_IMAGES_PATH"))
 
 def load_labels(subset=False, object_based_augmentation=False):
     if not os.path.exists(LABELS_PATH):
@@ -49,27 +49,34 @@ def load_labels(subset=False, object_based_augmentation=False):
     return labels_data
 
     
-def load_images(subset=False, type="train"):    
+def load_images(subset=False, use_SR=False, type="train"):   
+    
+    if use_SR:
+        path = SR_IMAGES_PATH
+        if not os.path.exists(path):
+            sys.path.append(os.path.abspath(".."))
+            subprocess.run(["python", os.path.join(os.path.dirname(__file__), "superresolution.py")], check=True)
 
-    if type == "train":
+    elif type == "train":
         if subset:
             path = IMAGES_SUBSET_PATH
             if not os.path.exists(path):
                 sys.path.append(os.path.abspath(".."))
                 subprocess.run(["python", os.path.join(os.path.dirname(__file__), "create_subsets.py")], check=True)
         else:
-            path = IMAGES_PATH
+            path = IMAGES_PATH 
 
     elif type == "eval":
         if subset:
             path = EVAL_IMAGES_SUBSET_PATH
             if not os.path.exists(path):
-                raise FileNotFoundError(f'Folder {path} not found. Please create a subset of the evaluation images.')
+                sys.path.append(os.path.abspath(".."))
+                subprocess.run(["python", os.path.join(os.path.dirname(__file__), "create_subsets.py")], check=True)
         else:
-            path = EVAL_IMAGES_PATH
-        
+            path = EVAL_IMAGES_PATH 
+
     else:
-        raise ValueError(f"Type {type} not recognized. Please choose either 'train' or 'eval'.")
+        raise ValueError("Invalid type. Use 'train' or 'eval' or use_SR=True.")
 
     if not os.path.exists(path):
         raise FileNotFoundError(f'Folder {path} not found. Please ensure your .env variables are correct.')
