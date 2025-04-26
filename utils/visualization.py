@@ -29,7 +29,7 @@ load_dotenv()
 LABELS_PATH = os.getenv("LABELS_PATH")
 IMAGES_PATH = os.getenv("IMAGES_PATH")
 MASKED_IMAGES_PATH = os.getenv("MASKED_IMAGES_PATH")
-EVAL_LABELS_PATH = os.getenv("EVAL_LABELS_PATH")
+PREDICTIONS_PATH = os.getenv("PREDICTIONS_PATH")
 EVAL_IMAGES_PATH = os.getenv("EVAL_IMAGES_PATH")
 
 # ---------------------------------------------------------------
@@ -215,7 +215,7 @@ def plot_masked_image(filename: str):
         plt.show()
 
 
-def plot_predictions(filename: str, band: int = 1):
+def plot_prediction(filename: str, path: str, band: int = 1):
     """
     Plot predictions for a given image with annotations.
     Args:
@@ -224,7 +224,7 @@ def plot_predictions(filename: str, band: int = 1):
     """
     os.chdir(os.path.join(os.path.dirname(__file__), '..')) # trengs denne?
     labels = get_json(LABELS_PATH)
-    predictions = get_json(EVAL_LABELS_PATH)
+    predictions = get_json(os.path.join(PREDICTIONS_PATH, path))
     gt_ann = find_annotations(labels, filename)
     pred_ann = find_annotations(predictions, filename)
 
