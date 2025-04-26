@@ -1,9 +1,7 @@
-from utils.OBA.object_based_augmentation import create_OBA_dataset
-from utils.preprocessing import get_processed_data
 from utils.evaluation import run_evaluation
 from train.train import train
-from train.loader import get_loader
-from train.selection import train_model_selection, get_dataset
+from train.loader import get_loader, get_dataset
+from train.selection import train_model_selection
 from models.simple_convnet import SimpleConvNet
 from models.UNet import UNet
 from models.resnet import UNetResNet18
@@ -15,10 +13,10 @@ import os
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.set_default_dtype(torch.double)
 
-
 def main(model_selection=False, subset=False):
     """
-    Main function to train and evaluate the model.
+    Main function to train and/or evaluate a model. Can be used for model selection with hyperparameter search 
+    or to train a single model.
     Args:
         model_selection (bool): If True, perform model selection with hyperparameter search.
         subset (bool): If True, use a subset of the data for training and evaluation.
@@ -34,7 +32,7 @@ def main(model_selection=False, subset=False):
 
         model = SimpleConvNet().to(DEVICE)  # SimpleConvNet().to(DEVICE) # UNet().to(DEVICE) # UNetResNet18().to(DEVICE)
         model.load_state_dict(torch.load(MODEL_PATH, weights_only=True, map_location=DEVICE))
-        dataset = get_dataset("SR_OBA", subset=subset)
+        dataset = get_dataset("normal", subset=subset)
 
         train_loader, val_loader, test_loader = get_loader(dataset, batch_size=batch_size)
         print("Size of training dataset: ", len(train_loader.dataset))
@@ -98,6 +96,7 @@ def main(model_selection=False, subset=False):
             torch.cuda.empty_cache()
             run_evaluation(best_model, test_loader, device=DEVICE, save=False)
             print("\n\nModel selection and evaluation completed.\n\n")
+            return best_train_losses, best_val_losses # if we want to plot the losses
 
     else: # train a single model
         print("\n\nTraining model...")
