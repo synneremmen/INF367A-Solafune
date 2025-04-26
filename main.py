@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR
 import os
+from datasets.deforestation_dataset import build_datasets
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.set_default_dtype(torch.double)
@@ -27,10 +28,10 @@ def main(model_selection=False, subset=False, use_OB=False):
         subset (bool): If True, use a subset of the data for training and evaluation.
     """
 
-    model = SimpleConvNet().to(
+    model = UNetResNet18().to(
         DEVICE
     )  # SimpleConvNet().to(DEVICE) # UNet().to(DEVICE) # UNetResNet18().to(DEVICE)
-
+    # model = model.float() unsure if needed
     print("\n\nLoading data...")
     if use_OB:
         print("Using OBA dataset")
@@ -52,9 +53,18 @@ def main(model_selection=False, subset=False, use_OB=False):
         )
         
     else:
-        dataset = get_processed_data(subset=subset)
+        train_loader, val_loader, test_loader = build_datasets(
+            images_dir=os.getenv("IMAGES_PATH"),
+            masks_dir=os.getenv("MASKED_IMAGES_PATH"),
+            train_ratio=0.8,
+            test_ratio=0.1,
+            seed=42,
+            batch_size=8,
+            num_workers=4
+        )
+            # get_processed_data(subset=subset)
 
-    train_loader, val_loader, test_loader = get_loader(dataset, batch_size=6)
+    #train_loader, val_loader, test_loader = get_loader(dataset, batch_size=6)
     print("Size of training dataset: ", len(train_loader.dataset))
     print("Size of validation dataset: ", len(val_loader.dataset))
     print("Size of test dataset: ", len(test_loader.dataset))
@@ -102,13 +112,11 @@ def main(model_selection=False, subset=False, use_OB=False):
             scheduler = StepLR(optimizer, step_size=10, gamma=0.1, verbose=False)
 
             losses_train = train(
-                n_epochs,
-                optimizer,
-                model,
-                loss_fn,
-                train_loader,
-                scheduler=scheduler,
-                device=DEVICE,
+                model=model,
+                optimizer=optimizer,
+                loss_fn=loss_fn,
+                train_loader=train_loader,
+                val_loader=val_loader
             )
 
             print("\n\nTraining completed. Training losses:")
@@ -124,4 +132,4 @@ def main(model_selection=False, subset=False, use_OB=False):
     print("\n\nEvaluation completed.\n\n")
 
 if __name__ == "__main__":
-    main(model_selection=True, subset=True, use_OB=False)
+    main(model_selection=False, subset=True, use_OB=False)
