@@ -17,6 +17,8 @@ import subprocess
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.set_default_dtype(torch.double)
 
+IMAGES_PATH = os.getenv("IMAGES_PATH")
+MASKED_IMAGES_PATH = os.getenv("MASKED_IMAGES_PATH")
 
 
 def main(model_selection=False, subset=False):
@@ -30,7 +32,7 @@ def main(model_selection=False, subset=False):
     loss_fn = nn.CrossEntropyLoss(ignore_index=0)
     n_epochs = 30
     batch_size = 16
-    MODEL_PATH = None# "models/SimpleConvNet_paramset_0.01_0.01_0.9.pth"
+    MODEL_PATH = "models/SimpleConvNet_paramset_0.001_0.01_0.9.pth"
 
     if MODEL_PATH and os.path.exists(MODEL_PATH):
         # use saved model if it exists
@@ -38,16 +40,16 @@ def main(model_selection=False, subset=False):
 
         model = SimpleConvNet().to(DEVICE)  # SimpleConvNet().to(DEVICE) # UNet().to(DEVICE) # UNetResNet18().to(DEVICE)
         model.load_state_dict(torch.load(MODEL_PATH, weights_only=True, map_location=DEVICE))
-        dataset = get_dataset("normal", subset=subset)
 
-        train_loader, val_loader, test_loader = get_loader(dataset, batch_size=batch_size)
-        print("Size of training dataset: ", len(train_loader.dataset))
-        print("Size of validation dataset: ", len(val_loader.dataset))
-        print("Size of test dataset: ", len(test_loader.dataset))
+        train_loader, val_loader, test_loader = build_datasets(
+            images_dir=IMAGES_PATH,
+            masks_dir=MASKED_IMAGES_PATH,
+            oba_generator=None,
+            num_workers=4)
 
         print("\n\nRunning evaluation...")
         torch.cuda.empty_cache()
-        run_evaluation(model, test_loader, device=DEVICE, save=False)
+        run_evaluation(model, test_loader, device=DEVICE, save=True)
         print("\n\nEvaluation completed of saved model.\n\n")
 
     elif model_selection:
@@ -55,7 +57,6 @@ def main(model_selection=False, subset=False):
         for dataset in ["SR"]: #["normal", "OBA", "SR", "SR_OBA"]:
             print(f"\n\nModel selection on {dataset} dataset...")
             
-            mask_path = os.getenv("MASKED_IMAGES_PATH")
             if dataset == "SR" or dataset == "SR_OBA":
                 image_path = os.getenv("SR_IMAGES_PATH")
                 if not os.path.exists(image_path):
@@ -67,7 +68,7 @@ def main(model_selection=False, subset=False):
                     subprocess.run([sys.executable, sr_script], check=True)
 
             else:
-                image_path = os.getenv("IMAGES_PATH")
+                image_path = IMAGES_PATH
 
             oba_generator = None
             if dataset == "OBA" or dataset == "SR_OBA":
@@ -75,7 +76,7 @@ def main(model_selection=False, subset=False):
 
             train_loader, val_loader, test_loader = build_datasets(
                 images_dir=image_path,
-                masks_dir=mask_path,
+                masks_dir=MASKED_IMAGES_PATH,
                 oba_generator=oba_generator,
                 num_workers=4)
             # dataset = get_dataset(dataset, subset=subset)

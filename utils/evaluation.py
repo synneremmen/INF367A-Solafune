@@ -10,6 +10,7 @@ def run_evaluation(model, loader, device, save=False, filename=None):
         filename=f"output_{str(model).split('(')[0]}.json"
 
     model.to(device) # Ensure model is on the correct device
+    model.float() # Ensure model is in float mode
     model_outputs = []  # Store model outputs
     true_labels = []  # Store true labels
     model.eval()
