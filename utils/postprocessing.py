@@ -8,16 +8,16 @@ import json
 
 class_names = ['plantation', 'logging', 'mining', 'grassland_shrubland']
 
-def outputs_to_polygons(outputs, min_area=1000, threshold=0.5):
+def outputs_to_polygons(outputs, num_channels=5, min_area=100, threshold=0.5):
     # Comes in the shape (B, C, H, W)
     polygons = []
-    for i in range(outputs.shape[0]):
-        output = outputs[i, :, :, :] # Shape (C, H, W)
+    for output in outputs: # Shape (C, H, W)
         num_channels = output.shape[0]
         polygons_by_class = {}
         
         for class_idx in range(num_channels):
             class_mask = output[class_idx]
+            class_mask = (class_mask > 0.5).astype(np.uint8)
             contours = measure.find_contours(class_mask, threshold)
             class_polygons = []
             for contour in contours:
@@ -32,39 +32,27 @@ def outputs_to_polygons(outputs, min_area=1000, threshold=0.5):
         
     return polygons
 
-def labels_to_polygons(loader, device="cpu"):
+def labels_to_polygons(labels, num_channels=5, threshold=0.5):
+    # Comes in the shape (B, H, W)
     polygons = []
-    with torch.inference_mode():
-        for images, labels in loader:
-            # Assuming labels are in batch[1], modify this if needed
-            true_labels = labels.to(device)  # Move to the correct device
+    for label in labels: # Shape (H, W)
+        polygons_by_class = {}
 
-            # Ensure labels are detached from computation graph and converted to numpy
-            true_labels = true_labels.cpu().numpy()  # Shape (B, H, W)
+        for class_idx in range(1, num_channels):  # Assuming class indices range from 1 to 4
+            mask = (label == class_idx).astype(np.uint8)
+            contours = measure.find_contours(mask, threshold)  # 0.5 threshold for contour detection
+            class_polygons = []
+            for contour in contours:
+                if len(contour) < 4:
+                    continue  # Ignore very small contours
+                # Convert (row, col) to (x, y) for Shapely
+                poly = Polygon([(pt[1], pt[0]) for pt in contour])
+                if poly.is_valid:
+                    class_polygons.append(poly)
+            polygons_by_class[class_idx] = class_polygons
+        polygons.append(polygons_by_class)
 
-            for i in range(true_labels.shape[0]):
-                label = true_labels[i, :, :]  # Shape (H, W)
-                polygons_by_class = {}
-
-                for class_idx in range(1, 5):  # Assuming class indices range from 1 to 4
-                    mask = (label == class_idx).astype(np.uint8)
-                    contours = measure.find_contours(mask, 0.5)  # 0.5 threshold for contour detection
-                    
-                    class_polygons = []
-                    for contour in contours:
-                        if len(contour) < 4:
-                            continue  # Ignore very small contours
-
-                        # Convert (row, col) to (x, y) for Shapely
-                        poly = Polygon([(pt[1], pt[0]) for pt in contour])
-                        if poly.is_valid:
-                            class_polygons.append(poly)
-
-                    polygons_by_class[class_idx] = class_polygons
-                polygons.append(polygons_by_class)
-    
     return polygons
-
 
 
 def polygons_to_json(polygons_by_class, file_name="train"):
