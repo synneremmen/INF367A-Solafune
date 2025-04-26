@@ -35,18 +35,15 @@ def run_evaluation(model, loader, device, save=False, filename=None):
         print(f"Model outputs saved to {filename}")
 
     score = f1_from_polygons(pred_polygons, true_polygons)
-    print("F1 score calculated.")
     print("F1:",score["Overall"]["F1"])
     print("Precision:",score["Overall"]["Precision"])
     print("Recall:",score["Overall"]["Recall"])
     return score
 
-def f1_from_polygons(pred_polygons_list, gt_polygons_list, iou_threshold=0.5):
-    print("Length of pred and gt polygons:")
-    print(len(pred_polygons_list), len(gt_polygons_list))
+def f1_from_polygons(pred_polygons_list, gt_polygons_list):
     pixel_metrics = metrics.PixelBasedMetrics()
-    
     all_classes = set()
+
     for pred_dict in pred_polygons_list:
         all_classes.update(pred_dict.keys())
     for gt_dict in gt_polygons_list:
