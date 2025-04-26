@@ -119,6 +119,6 @@ def get_dataset(dataset_type, subset=False):
 
     if use_SR:
         print("Using SR dataset")
-        dataset = get_processed_data(subset=subset, use_SR=True)
+        dataset = get_processed_data(use_SR=True, subset=False)
 
     return dataset
