@@ -5,7 +5,7 @@ from train.selection import train_model_selection
 from models.simple_convnet import SimpleConvNet
 from models.UNet import UNet
 from models.resnet import UNetResNet18
-from models.vit_large import vit_seg_large_patch16
+from models.vit_large import vit_seg_large_patch16, make_vit_finetune
 import torch
 import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR
@@ -14,6 +14,7 @@ from datasets.deforestation_dataset import build_datasets
 from utils.OBA.object_based_augmentation import Generator
 import sys
 import subprocess
+from functools import partial
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.set_default_dtype(torch.double)
@@ -32,7 +33,7 @@ def main(model_selection=False, subset=False):
     """
     loss_fn = nn.CrossEntropyLoss(ignore_index=0)
     n_epochs = 30
-    batch_size = 16
+    batch_size = 8
     MODEL_PATH = None #"models/SimpleConvNet_paramset_0.001_0.01_0.9.pth"
 
     if MODEL_PATH and os.path.exists(MODEL_PATH):
@@ -56,7 +57,7 @@ def main(model_selection=False, subset=False):
 
     elif model_selection:
         # perform model selection with hyperparameter search on different models and/or with different datasets
-        for dataset in ["normal", "OBA", "SR", "SR_OBA"]:
+        for dataset in ["OBA"]:# ["normal", "OBA", "SR", "SR_OBA"]:
             print(f"\n\nModel selection on {dataset} dataset...")
             
             if dataset == "SR" or dataset == "SR_OBA":
@@ -82,11 +83,9 @@ def main(model_selection=False, subset=False):
                 images_dir=image_path,
                 masks_dir=MASKED_IMAGES_PATH,
                 oba_generator=oba_generator,
-                num_workers=4,
+                num_workers=24,
                 batch_size=batch_size)
-            # dataset = get_dataset(dataset, subset=subset)
 
-            # train_loader, val_loader, test_loader = get_loader(dataset, batch_size=batch_size)
             print("Size of training dataset: ", len(train_loader.dataset))
             print("Size of validation dataset: ", len(val_loader.dataset))
             print("Size of test dataset: ", len(test_loader.dataset))
@@ -98,17 +97,18 @@ def main(model_selection=False, subset=False):
             #     'mom': [0.9, 0.99],
             # }
             models = {
-                # "SimpleConvNet": SimpleConvNet,
-                # "UNet": UNet,
-                # "UNetResNet18": UNetResNet18,
-                "ViT-finetune": vit_seg_large_patch16(
-                    img_size=512,
+                "SimpleConvNet": SimpleConvNet,
+                "UNet": UNet,
+                "UNetResNet18": UNetResNet18,
+                "ViT-finetune": partial(
+                    make_vit_finetune,
                     num_classes=5,
                     patch_size=16,
+                    img_size=1024,
                     in_chans=12,
                     ckpt_path="checkpoint_ViT-L_pretrain_fmow_sentinel.pth",
-                    n_trainable_layers=4,
-                ),
+                    n_trainable_layers=2
+                )
             }
 
             # For testing
@@ -126,6 +126,7 @@ def main(model_selection=False, subset=False):
                 loss_fn,
                 train_loader,
                 val_loader,
+                dataset=dataset,
                 device=DEVICE,
                 early_stopping=True, 
                 patience=5,  # early stopping if it doesn't improve for 5 epochs
@@ -137,7 +138,6 @@ def main(model_selection=False, subset=False):
             torch.cuda.empty_cache()
             run_evaluation(best_model, test_loader, device=DEVICE, save=False)
             print("\n\nModel selection and evaluation completed.\n\n")
-            return best_train_losses, best_val_losses # if we want to plot the losses
 
     else: # train a single model
         print("\n\nTraining model...")
@@ -148,9 +148,12 @@ def main(model_selection=False, subset=False):
 
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001) 
         scheduler = StepLR(optimizer, step_size=10, gamma=0.1, verbose=False)
-        dataset = get_dataset("normal", subset=subset)
-
-        train_loader, val_loader, test_loader = get_loader(dataset, batch_size=batch_size)
+        train_loader, val_loader, test_loader = build_datasets(
+            images_dir=image_path,
+            masks_dir=MASKED_IMAGES_PATH,
+            oba_generator=oba_generator,
+            num_workers=4,
+            batch_size=batch_size)
         print("Size of training dataset: ", len(train_loader.dataset))
         print("Size of validation dataset: ", len(val_loader.dataset))
         print("Size of test dataset: ", len(test_loader.dataset))

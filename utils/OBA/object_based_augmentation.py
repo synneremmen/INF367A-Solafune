@@ -115,11 +115,13 @@ class Generator:
         """
         labels = load_labels(subset=subset, object_based_augmentation=True)
 
-        samples = build_samples(
+        all_samples = build_samples(
             images_dir=os.getenv("MASKED_IMAGES_PATH"),
             masks_dir=os.getenv("MASKED_IMAGES_PATH"),
 
         )
+
+        samples = random.sample(all_samples, 5)
 
         all_object_masks = []
         for img_path, _ in samples:
@@ -375,6 +377,8 @@ class Generator:
             tuple: The augmented image and mask.
         """
         self.flag_as_augm = False
+        self.extracted_objects = self._extract_objects()
+
         # -------------------------------------------------------------------
         # find the background
         # -------------------------------------------------------------------

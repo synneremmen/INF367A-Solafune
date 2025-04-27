@@ -7,6 +7,7 @@ from utils.preprocessing import get_processed_data
 from torch import optim
 from itertools import product
 from torch.optim.lr_scheduler import StepLR
+import os
 
 def selection(models:list[nn.Module], val_loader, device) -> None:
     best_model = None
@@ -26,7 +27,7 @@ def selection(models:list[nn.Module], val_loader, device) -> None:
 
     return best_model, best_score
 
-def train_model_selection(models, param_grid, n_epochs, loss_fn, train_loader, val_loader, device='cpu', early_stopping=True, patience=5):
+def train_model_selection(models, param_grid, n_epochs, loss_fn, train_loader, val_loader, dataset, device='cpu', early_stopping=True, patience=5):
     best_val_score = float('-inf')
     best_model = None
     best_model_name = None
@@ -40,6 +41,32 @@ def train_model_selection(models, param_grid, n_epochs, loss_fn, train_loader, v
     # iterate over all models and hyperparameter combinations
     for name, model_fn in models.items():
         for idx, (lr, decay, mom) in enumerate(param_combinations):
+
+            model_save_path = f"models/{name}_{dataset}_paramset_{lr}_{decay}_{mom}.pth"
+            
+            if os.path.exists(model_save_path):
+                print(f"\nFound checkpoint for {name} param set {idx}, loading instead of training.")
+                # instantiate & load
+                model = model_fn().to(device)
+                model.load_state_dict(torch.load(model_save_path, map_location=device))
+                model.eval()
+
+                # evaluate loaded model
+                result_dict = run_evaluation(model, val_loader, device, save=False)
+                val_score = result_dict["Overall"]["F1"]
+                print(f"Loaded model validation F1: {val_score}")
+
+                if val_score > best_val_score:
+                    best_val_score = val_score
+                    best_model = model
+                    best_model_name = f"{name}_paramset_{idx}"
+                    best_params = {'lr': lr, 'decay': decay, 'mom': mom}
+                    best_train_losses = None
+                    best_val_losses = None
+
+                    # skip training entirely
+                continue
+
 
             # instantiate the model and optimizer
             model = model_fn().to(device)
@@ -59,7 +86,6 @@ def train_model_selection(models, param_grid, n_epochs, loss_fn, train_loader, v
             print("=" * 50)
 
             print("\n\nSaving model...")
-            model_save_path = f"models/{name}_paramset_{lr}_{decay}_{mom}.pth"
             torch.save(model.state_dict(), model_save_path)
             print(f"Model saved to {model_save_path}")
 

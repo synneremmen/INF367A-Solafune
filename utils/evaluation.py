@@ -17,7 +17,7 @@ def run_evaluation(model, loader, device, save=False, filename=None):
 
     with torch.inference_mode():
         for image, label in loader:
-            image_tensor = image.to(device)
+            image_tensor = image.to(device, non_blocking=True)
             outputs = model(image_tensor)
             model_outputs.append(torch.softmax(outputs, dim=1))
             true_labels.append(label)
