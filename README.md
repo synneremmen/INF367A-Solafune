@@ -1,7 +1,69 @@
 # INF367A-Identifying Deforestation drivers
 
-This project is a submission to [Solafune competition](https://solafune.com/competitions/68ad4759-4686-4bb3-94b8-7063f755b43d?menu=about&tab=&topicId=a5e978e7-7759-4433-b1a5-063760451ff5).
+This project contains our submission to [Solafune competition](https://solafune.com/competitions/68ad4759-4686-4bb3-94b8-7063f755b43d?menu=about&tab=&topicId=a5e978e7-7759-4433-b1a5-063760451ff5).
 
+
+## Project Description
+
+As described in the competition deforestation is when previously forested areas are turned into non-forrested. This is usually due to human activity were forested areas are turned into cultivated land in some manor.
+
+This heavily affets rainforest such as the amazons. The competition wishes to identify deforestation drivers by using drone images.
+
+The project also contains 3 individuals implementations:
+- superresolution
+    - location: SR/
+- object based augmentaion
+    - location: OBA/
+- transfomers (SatMAE-PP)
+    - location: satmae_pp/
+
+## File Structure
+
+project/
+├── main.py
+├── exploratory_data_analysis.ipynb
+├── .env
+├── requirements.txt
+├── README.md
+├── train/
+│   ├── loader.py
+│   ├── selection.py
+│   └── train.py
+├── utils/
+│   ├── create_masked_data.py
+│   ├── create_subsets.py
+│   ├── evaluation.py
+│   ├── loading.py
+│   ├── normalize.py
+│   ├── postprocessing.py
+│   ├── preprocessing.py
+│   └── visualization.py
+├── SR/
+│   ├── superres/
+│   │   ├── L2A20M.pt
+│   │   └── L2A60M.pt
+│   ├── superresolution.py
+│   ├── README.md
+│   └── SR-inspect.ipynb
+├── satmae_pp/
+│   ├── README.md
+│   ├── satemae_pp.py
+│   └── vit_large.py
+├── OBA/
+│   ├── README.md
+│   ├── augmentation.py
+│   ├── object_based_augmentation.py
+│   └── inspect_object_based_augmentation.ipynb
+├── data/
+│   ├── train_images/
+│   ├── masked_annotations/
+│   └── train_annotations.json
+├── datasets/
+│   └── deforestation_dataset.py
+└── models/
+    ├── simple_convnet.py
+    ├── resnet.py
+    └── UNet.py
 
 ## Create .env
 
@@ -37,25 +99,35 @@ OBA_MASKED_IMAGES_PATH = path/to/oba_masked_images_path/
 BACKGROUND_IMAGES_PATH = path/to/background_images/
 ```
 
-## Project Description
-
-As described in the competition deforestation is when previously forested areas are turned into non-forrested. This is usually due to human activity were forested areas are turned into cultivated land in some manor.
-
-This heavily affets rainforest such as the amazons. The competition wishes to identify deforestation drivers by using drone images.
-
 ## Dataset
 
 Contains a training dataset of 176 datapoints:
-- dsda
-- fsdadsad
-- dsadsa
+We split this into train, val and test for training and model evaluation.
 
-Evaluation_images
-- Contains
+## Methodology
 
-## Methodology (ADD MORE DETAIL)
+- **Evaluation Metric**  
+  - Pixel-wise IoU F1-score was used to measure model performance, balancing precision and recall by evaluating the overlap between predicted and ground truth segments.
 
-CNN, ect, Using a combination of remote sensing data and advanced machine learning techniques, competitors will analyze satellite images to distinguish between different land-use changes that lead to deforestation, such as agricultural expansion, mining, or other factors LOREM IPSUM LOREM.
+- **Model Architectures**  
+  - Implemented three main model types:
+    - A baseline convolutional neural network (CNN).
+    - A ResNet-based encoder-decoder network.
+    - A novel transformer-based architecture (SatMAE).
+
+- **Hyperparameter Search**  
+  - Performed grid search over key hyperparameters (e.g., learning rate, batch size) for each architecture.
+
+- **Data Augmentation**  
+  - Trained models on datasets with various augmentations:
+    - **Super-resolution**: Low-resolution bands were enhanced to higher resolution before training.
+    - **Object-based augmentation**: Techniques applied to improve segmentation around objects of interest.
+
+- **Model Selection**  
+  - Selected the best model based on highest validation F1-score.
+
+- **Final Evaluation**  
+  - Evaluated the selected model on a separate, unseen test set to assess generalization performance.
 
 ## Required packages
 
@@ -73,8 +145,6 @@ pip install -r requirements.txt
 
 1. Run the create_masked_data.py to get images in the masked_annotations folder. 
 These tif files contains only one band of size 1024x1024. Each pixel in the data contains the class value (0-4, where 0 is none.)
-
-## Submission and evaluation
 
 ## Contributors
 

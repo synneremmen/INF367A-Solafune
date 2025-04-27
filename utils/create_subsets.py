@@ -3,6 +3,10 @@ import shutil
 import subprocess
 from dotenv import load_dotenv
 
+# -------------------------------------------------------------------
+# Scripts to create subsets of the dataset
+# -------------------------------------------------------------------
+
 load_dotenv()
 IMAGES_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.getenv("IMAGES_PATH")) 
 MASKED_IMAGES_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.getenv("MASKED_IMAGES_PATH")) 

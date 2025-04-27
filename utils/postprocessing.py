@@ -19,12 +19,11 @@ def outputs_to_polygons(outputs, num_channels=5, min_area=0, threshold=0.5):
         
         for class_idx in range(1,num_channels):
             class_mask = output[class_idx]
-            #class_mask = (class_mask > 0.5).astype(np.uint8)
             contours = measure.find_contours(class_mask, threshold)
             class_polygons = []
             for contour in contours:
-                # if len(contour) < 4:
-                #     continue
+                if len(contour) < 4:
+                    continue
                 # Convert (row, col) to (x, y) for Shapely.
                 poly = Polygon([(pt[1], pt[0]) for pt in contour])
                 if poly.area >= min_area and poly.is_valid:
@@ -40,14 +39,13 @@ def labels_to_polygons(labels, num_channels=5, threshold=0.5):
     for label in labels: # Shape (H, W)
         polygons_by_class = {}
 
-        for class_idx in range(1, num_channels):  # Assuming class indices range from 1 to 4
+        for class_idx in range(1, num_channels):  # class indices start from 1, 0 is None
             mask = (label == class_idx).astype(np.uint8)
             contours = measure.find_contours(mask, threshold)  # 0.5 threshold for contour detection
             class_polygons = []
             for contour in contours:
                 if len(contour) < 4:
                     continue  # Ignore very small contours
-                # Convert (row, col) to (x, y) for Shapely
                 poly = Polygon([(pt[1], pt[0]) for pt in contour])
                 if poly.is_valid:
                     class_polygons.append(poly)

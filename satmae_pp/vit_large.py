@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from timm.models.vision_transformer import VisionTransformer as _VisionTransformer
-from satmae_pp.satmae_pp import get_2d_sincos_pos_embed, freeze_layers
+from satmae_pp.satmae_pp import get_2d_sincos_pos_embed, load_freeze_layers
 
 
 class VisionTransformerSeg(_VisionTransformer):
@@ -65,8 +65,7 @@ def vit_seg_large_patch16(num_classes, patch_size, img_size, in_chans, **kwargs)
     )
 
 def make_vit_finetune(
-    num_classes, patch_size, img_size, in_chans,
-    ckpt_path, n_trainable_layers
+    ckpt_path, num_classes:int=5, patch_size:int=16, img_size:int=1024, in_chans:int=12, n_trainable_layers:int=2
 ):
     """
     Creates a ViT model for pretraining on the deforestation dataset 
@@ -77,4 +76,4 @@ def make_vit_finetune(
         img_size=img_size,
         in_chans=in_chans
     )
-    return freeze_layers(model, n_trainable_layers=n_trainable_layers, ckpt_path=ckpt_path)
+    return load_freeze_layers(model, n_trainable_layers=n_trainable_layers, ckpt_path=ckpt_path)

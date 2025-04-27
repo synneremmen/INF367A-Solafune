@@ -242,3 +242,21 @@ def plot_prediction(filename, path, band=1):
 
         plt.suptitle(f"{filename} with class(es): {', '.join(get_unique_classes(gt_ann))}")
         plt.show()
+
+def plot_loss(train_loss:list, val_loss:list, save_path=None):
+    """Plot training and validation loss."""
+    plt.figure(figsize=(10, 5))
+    plt.plot(train_loss, label='Training Loss', color='blue')
+    plt.plot(val_loss, label='Validation Loss', color='orange')
+    plt.title('Training and Validation Loss over Epochs')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid()
+
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)
+        print(f"Loss plot saved to {save_path}")
+    
+    plt.show()

@@ -34,58 +34,12 @@ def run_evaluation(model, loader, device, save=False, filename=None):
         save_json_to_folder(json_data, "./data/predictions", filename=filename)
         print(f"Model outputs saved to {filename}")
 
-    score = pixel_f1_from_polygons(pred_polygons, true_polygons)
-    print("Pixel F1 from polygons:", score)
-    print("IoU F1 from polygons:", iou_f1_from_polygons(pred_polygons, true_polygons))
+    score = iou_f1_from_polygons(pred_polygons, true_polygons)
+    print("IoU F1 from polygons:", score)
     print("F1:",score["Overall"]["F1"])
     print("Precision:",score["Overall"]["Precision"])
     print("Recall:",score["Overall"]["Recall"])
     return score
-
-def pixel_f1_from_polygons(pred_polygons_list, gt_polygons_list):
-    pixel_metrics = metrics.PixelBasedMetrics()
-    all_classes = set()
-
-    for pred_dict in pred_polygons_list:
-        all_classes.update(pred_dict.keys())
-    for gt_dict in gt_polygons_list:
-        all_classes.update(gt_dict.keys())
-
-    if not all_classes:
-        # Handle edge case where there are no classes in predictions or ground truth
-        return {"Overall": {"F1": 0.0, "Precision": 0.0, "Recall": 0.0}}
-
-    f1_scores = {class_idx: {"F1": [], "Precision": [], "Recall": []} for class_idx in all_classes}
-
-    print("Pred polygons list:", pred_polygons_list)
-    print("GT polygons list:", gt_polygons_list)
-    for pred_polygons, gt_polygons in zip(pred_polygons_list, gt_polygons_list):
-        for class_idx in all_classes:
-            preds = pred_polygons.get(class_idx, [])
-            gts = gt_polygons.get(class_idx, [])
-            
-            if not preds and not gts:
-                continue  # Skip if both predictions and ground truths are empty
-            
-            f1, precision, recall = pixel_metrics.compute_f1(gts, preds)
-
-            f1_scores[class_idx]["F1"].append(f1)
-            f1_scores[class_idx]["Precision"].append(precision)
-            f1_scores[class_idx]["Recall"].append(recall)
-
-    # find average f1 score for each class
-    for class_idx in f1_scores:
-        f1_scores[class_idx]["F1"] = np.mean(f1_scores[class_idx]["F1"])
-        f1_scores[class_idx]["Precision"] = np.mean(f1_scores[class_idx]["Precision"])
-        f1_scores[class_idx]["Recall"] = np.mean(f1_scores[class_idx]["Recall"])
-
-    overall_f1 = np.mean([f1_scores[class_idx]["F1"] for class_idx in all_classes])
-    overall_precision = np.mean([f1_scores[class_idx]["Precision"] for class_idx in all_classes])
-    overall_recall = np.mean([f1_scores[class_idx]["Recall"] for class_idx in all_classes])
-
-    f1_scores["Overall"] = {"F1": overall_f1, "Precision": overall_precision, "Recall": overall_recall}
-
-    return f1_scores
 
 
 def iou_f1_from_polygons(pred_polygons_list, gt_polygons_list):

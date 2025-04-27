@@ -67,12 +67,6 @@ def train(model, optimizer, loss_fn, train_loader,val_loader=None, device="cuda"
 
                 losses_val.append(loss_val / n_val_batch)
 
-        # if epoch == 1 or epoch % 5 == 0:
-        # print(f'--------- Epoch: {epoch} ---------')
-        # print('Training loss {:.5f} at {}'.format(loss_train / n_train_batch, datetime.datetime.now()))
-        # if val_loader is not None:
-        #     print('Validation loss {:.5f} at {}'.format(loss_val / n_val_batch, datetime.datetime.now()))
-        # print()
 
         if scheduler:
             scheduler.step()
