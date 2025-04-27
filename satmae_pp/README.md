@@ -42,7 +42,7 @@ To reproduce the finetuning run the main file.
 
 
 ## Citation
-
+The functions in **satmae_pp.py** (expect load_freeze_layers) is retrieved from https://github.com/techmn/satmae_pp
 ```
 @inproceedings{satmaepp2024rethinking,
       title={Rethinking Transformers Pre-training for Multi-Spectral Satellite Imagery}, 
