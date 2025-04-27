@@ -25,11 +25,11 @@ This project adapts the pretrained DSen2 model to super-resolve GeoTIFF images w
 
     Bands at 20m and 60m resolution are super-resolved using the respective models.
 
-    Super-resolved bands are combined with native 10m bands to produce a fully super-resolved output.
+    Super-resolved bands are combined with native 10m bands to produce a full GeoTIFF file.
 
     Outputs are saved according to the paths specified in the .env configuration file.
 
-    The super-resolution step can be run standalone (superresolution.py) or integrated into the full processing pipeline (main.py using mode="SR").
+    The super-resolution step can be run standalone (superresolution.py) or used in the train pipeline (main.py using for dataset in ["SR"]).
 
 
 ## Installation and Setup
