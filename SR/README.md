@@ -1,5 +1,10 @@
 # Super-Resolution: DSen2 - Implemented for GeoTIFF using pretrained weights(superresolution.py)
 
+Author
+----------
+
+Christian Bontveit
+
 ## Overview
 
 DSen2 is a super-resolution network introduced in the paper "Super-resolution of Sentinel-2 images: Learning a globally applicable deep neural network".
