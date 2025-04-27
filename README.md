@@ -8,10 +8,10 @@ This project is a submission to [Solafune competition](https://solafune.com/comp
 Create an .env file with the following information:
 
 ```plaintext
-LABELS_PATH=path/to/labels
-IMAGES_PATH=path/to/images
-MASKED_IMAGES_PATH=path/to/masked/images
-EVAL_IMAGES_PATH=path/to/evaluation/images
+LABELS_PATH = path/to/labels/
+IMAGES_PATH = path/to/images/
+MASKED_IMAGES_PATH = path/to/masked/images/
+EVAL_IMAGES_PATH = path/to/evaluation/images/
 ```
 
 If training using a subset, these are also required:
@@ -32,8 +32,9 @@ SR_60M_PATH = path/to/superresolution_60m_model
 
 If training with object-based augmentation
 ```plaintext
-OBA_IMAGES_PATH = path/to/superresolved_images
-OBA_M_IMAGES_PATH = path/to/superresolution_20m_model
+OBA_IMAGES_PATH = path/to/oba_images_path/
+OBA_MASKED_IMAGES_PATH = path/to/oba_masked_images_path/
+BACKGROUND_IMAGES_PATH = path/to/background_images/
 ```
 
 ## Project Description
