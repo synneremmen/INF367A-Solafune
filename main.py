@@ -82,17 +82,14 @@ def main(model_selection=False, subset=False):
                     subprocess.run([sys.executable, sr_script], check=True)
 
             elif dataset == "OBA":
-                create_save_OBA_images(subset=subset) # create new OBA images each time for randomness
+                #create_save_OBA_images(subset=subset) # create new OBA images each time for randomness
                 image_path = os.getenv("OBA_IMAGES_PATH")
                 masked_image_path = os.getenv("OBA_MASKED_IMAGES_PATH")
 
             elif dataset == "SR_OBA":
-                create_save_OBA_images(subset=subset, use_SR=True) # create new OBA images each time for randomness
+                #create_save_OBA_images(subset=subset, use_SR=True) # create new OBA images each time for randomness
                 image_path = os.getenv("OBA_IMAGES_PATH")
                 masked_image_path = os.getenv("OBA_MASKED_IMAGES_PATH")
-
-            else:
-                image_path = image_path
 
             oba_generator = None
             # if dataset == "OBA" or dataset == "SR_OBA":
@@ -104,7 +101,7 @@ def main(model_selection=False, subset=False):
                 images_dir=image_path,
                 masks_dir=masked_image_path,
                 oba_generator=oba_generator,
-                num_workers=24,
+                num_workers=4,
                 batch_size=batch_size)
 
             print("Size of training dataset: ", len(train_loader.dataset))
