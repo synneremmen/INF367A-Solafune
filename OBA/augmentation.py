@@ -10,7 +10,7 @@ from albumentations import (
 )
 
 def add_noise(image, **kwargs):
-    return image + np.random.normal(0, 0.01, image.shape).astype(image.dtype)
+    return image + np.random.normal(0, 0.1, image.shape).astype(image.dtype)
 
 def scale_brightness(image, **kwargs):
     return image * np.random.uniform(0.9, 1.1)
