@@ -19,9 +19,6 @@ def run_evaluation(model, loader, device, save=False, filename=None):
         for image, label in loader:
             image_tensor = image.to(device, non_blocking=True)
             outputs = model(image_tensor)
-            outputs = outputs[:, 1:, :, :]
-            print(outputs.shape)
-
             model_outputs.append(torch.softmax(outputs, dim=1))
             true_labels.append(label)
 
@@ -38,7 +35,8 @@ def run_evaluation(model, loader, device, save=False, filename=None):
         print(f"Model outputs saved to {filename}")
 
     score = pixel_f1_from_polygons(pred_polygons, true_polygons)
-    print(iou_f1_from_polygons(pred_polygons, true_polygons))
+    print("Pixel F1 from polygons:", score)
+    print("IoU F1 from polygons:", iou_f1_from_polygons(pred_polygons, true_polygons))
     print("F1:",score["Overall"]["F1"])
     print("Precision:",score["Overall"]["Precision"])
     print("Recall:",score["Overall"]["Recall"])
@@ -53,12 +51,21 @@ def pixel_f1_from_polygons(pred_polygons_list, gt_polygons_list):
     for gt_dict in gt_polygons_list:
         all_classes.update(gt_dict.keys())
 
+    if not all_classes:
+        # Handle edge case where there are no classes in predictions or ground truth
+        return {"Overall": {"F1": 0.0, "Precision": 0.0, "Recall": 0.0}}
+
     f1_scores = {class_idx: {"F1": [], "Precision": [], "Recall": []} for class_idx in all_classes}
 
+    print("Pred polygons list:", pred_polygons_list)
+    print("GT polygons list:", gt_polygons_list)
     for pred_polygons, gt_polygons in zip(pred_polygons_list, gt_polygons_list):
         for class_idx in all_classes:
             preds = pred_polygons.get(class_idx, [])
             gts = gt_polygons.get(class_idx, [])
+            
+            if not preds and not gts:
+                continue  # Skip if both predictions and ground truths are empty
             
             f1, precision, recall = pixel_metrics.compute_f1(gts, preds)
 

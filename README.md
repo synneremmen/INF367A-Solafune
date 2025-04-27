@@ -22,6 +22,8 @@ MASKED_IMAGES_SUBSET_PATH = path/to/subset/images
 EVAL_IMAGES_SUBSET_PATH = path/to/evaluation/images/subset
 ```
 
+If training with superresolution images
+
 ```plaintext
 SR_IMAGES_PATH = path/to/superresolved_images
 SR_20M_PATH = path/to/superresolution_20m_model
