@@ -6,6 +6,7 @@ from torch import optim
 from itertools import product
 from torch.optim.lr_scheduler import StepLR
 import os
+from utils.visualization import plot_loss
 
 def selection(models:list[nn.Module], val_loader, device) -> None:
     best_model = None
@@ -75,6 +76,8 @@ def train_model_selection(models, param_grid, n_epochs, loss_fn, train_loader, v
             # train the model
             print(f"\n\nTraining {name} with param set {idx}: lr={lr}, decay={decay}, mom={mom}")
             train_losses, val_losses = train(model, optimizer, loss_fn, train_loader, val_loader, device, n_epochs, scheduler, early_stopping=early_stopping, patience=patience)
+
+            plot_loss(train_losses, val_losses, save_path=f"losses/{name}_{dataset}_paramset_{idx}.png")
 
             result_dict = run_evaluation(model, val_loader, device, save=False)
             val_score = result_dict["Overall"]["F1"]  # Only take Overall F1 score

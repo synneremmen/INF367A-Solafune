@@ -68,11 +68,12 @@ def main(model_selection=False, subset=False):
 
     elif model_selection:
         # perform model selection with hyperparameter search on different models and/or with different datasets
-        for dataset in ["OBA"]:# ["normal", "OBA", "SR", "SR_OBA"]:
+        for dataset in ["normal", "OBA", "SR", "SR_OBA"]:
             print(f"\n\nModel selection on {dataset} dataset...")
             
             if dataset == "SR":
                 image_path = os.getenv("SR_IMAGES_PATH")
+                masked_image_path = MASKED_IMAGES_PATH
                 if not os.path.exists(image_path):
                     sr_script = os.path.join(
                         os.path.dirname(__file__),
@@ -88,14 +89,15 @@ def main(model_selection=False, subset=False):
 
             elif dataset == "SR_OBA":
                 #create_save_OBA_images(subset=subset, use_SR=True) # create new OBA images each time for randomness
-                image_path = os.getenv("OBA_IMAGES_PATH")
-                masked_image_path = os.getenv("OBA_MASKED_IMAGES_PATH")
+                image_path = os.getenv("SR_OBA_IMAGES_PATH")
+                masked_image_path = os.getenv("SR_OBA_MASKED_IMAGES_PATH")
+            else:
+                image_path = IMAGES_PATH
+                masked_image_path = MASKED_IMAGES_PATH
 
             oba_generator = None
             # if dataset == "OBA" or dataset == "SR_OBA":
-            #     print("Using OBA generator for augmentation...")
             #     oba_generator = Generator(batch_size=batch_size)
-            #     print("Finished creating OBA generator...")
 
             train_loader, val_loader, test_loader = build_datasets(
                 images_dir=image_path,
@@ -115,18 +117,19 @@ def main(model_selection=False, subset=False):
             #     'mom': [0.9, 0.99],
             # }
             models = {
-                "SimpleConvNet": SimpleConvNet,
-                "UNet": UNet,
-                "UNetResNet18": UNetResNet18,
+                #"SimpleConvNet": SimpleConvNet,
+                #"UNet": UNet,
+                #"UNetResNet18": UNetResNet18,
                 "ViT-finetune": partial(
                     make_vit_finetune,
-                    num_classes=5,
-                    patch_size=16,
-                    img_size=1024,
-                    in_chans=12,
-                    ckpt_path="checkpoint_ViT-L_pretrain_fmow_sentinel.pth",
+                    ckpt_path="satmae_pp/checkpoint_ViT-L_pretrain_fmow_sentinel.pth",
                     n_trainable_layers=2
-                )
+                )#,
+                # "ViT-finetune": partial(
+                #     make_vit_finetune,
+                #     ckpt_path="satmae_pp/checkpoint_ViT-L_pretrain_fmow_sentinel.pth",
+                #     n_trainable_layers=3
+                # )
             }
 
             # For testing

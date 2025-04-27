@@ -57,8 +57,6 @@ def pixel_f1_from_polygons(pred_polygons_list, gt_polygons_list):
 
     f1_scores = {class_idx: {"F1": [], "Precision": [], "Recall": []} for class_idx in all_classes}
 
-    print("Pred polygons list:", pred_polygons_list)
-    print("GT polygons list:", gt_polygons_list)
     for pred_polygons, gt_polygons in zip(pred_polygons_list, gt_polygons_list):
         for class_idx in all_classes:
             preds = pred_polygons.get(class_idx, [])

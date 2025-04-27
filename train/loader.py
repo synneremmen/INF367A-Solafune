@@ -8,7 +8,7 @@ from torch import Generator
 def get_loader(dataset, batch_size, train_split=0.7, val_split=0.2, test_split=0.1, seed_value=42):
     assert int(train_split * 100) + int(val_split * 100) + int(test_split * 100) == 100, f"Splits must sum to 1, but got {train_split + val_split + test_split}"
     
-    seed = Generator().manual_seed(seed_value) # to avoid data leakage
+    seed = Generator().manual_seed(seed_value) 
     
     train_size = int(train_split * len(dataset))
     val_size = int(val_split * len(dataset))

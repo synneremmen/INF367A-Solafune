@@ -109,11 +109,14 @@ def interpolate_pos_embed(model, checkpoint_model):
             new_pos_embed = torch.cat((extra_tokens, pos_tokens), dim=1)
             checkpoint_model['pos_embed'] = new_pos_embed
 
-def freeze_layers(
+def load_freeze_layers(
     model: nn.Module,
     ckpt_path: str,
     n_trainable_layers: int = 4
 ) -> nn.Module:
+    """
+    Load a pre-trained checkpoint and freeze all layers except the last n_trainable_layers
+    """
     
     checkpoint = torch.load(ckpt_path, map_location='cpu', weights_only=False)
     print("Load pre-trained checkpoint from: %s" % ckpt_path)
@@ -122,9 +125,7 @@ def freeze_layers(
 
     for k in ['pos_embed',
             'patch_embed.proj.weight', 'patch_embed.proj.bias',
-            # drop the old cls‐head keys (they don’t exist on your seg model)
-            'head.weight', 'head.bias',
-            # and also drop any fc_norm if you had global_pool
+            'head.weight', 'head.bias', # drop the old cls keys
             'fc_norm.weight', 'fc_norm.bias']:
         if k in checkpoint_model and (k not in state_dict or
                                     checkpoint_model[k].shape != state_dict[k].shape):
