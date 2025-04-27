@@ -40,7 +40,7 @@ def labels_to_polygons(labels, num_channels=5, threshold=0.5):
     for label in labels: # Shape (H, W)
         polygons_by_class = {}
 
-        for class_idx in range(1, num_channels):  # Assuming class indices range from 1 to 4
+        for class_idx in range(1, num_channels):  # class indices start from 1, 0 is None
             mask = (label == class_idx).astype(np.uint8)
             contours = measure.find_contours(mask, threshold)  # 0.5 threshold for contour detection
             class_polygons = []
