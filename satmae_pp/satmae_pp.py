@@ -114,16 +114,7 @@ def freeze_layers(
     ckpt_path: str,
     n_trainable_layers: int = 4
 ) -> nn.Module:
-    """
-    1) Loads ViT-L checkpoint (only matching keys),
-    2) Freezes everything,
-    3) Unfreezes: 
-       - the patch embed,
-       - the last n transformer blocks,
-       - the final LayerNorm,
-       - and your seg_head.
-    """
-    # --- 1) load & filter the pretrained ViT-L weights
+    
     checkpoint = torch.load(ckpt_path, map_location='cpu', weights_only=False)
     print("Load pre-trained checkpoint from: %s" % ckpt_path)
     checkpoint_model = checkpoint['model']
@@ -141,37 +132,25 @@ def freeze_layers(
             del checkpoint_model[k]
 
     
-    # interpolate position embedding
     interpolate_pos_embed(model, checkpoint_model)
 
-    # load pre-trained model
-    msg = model.load_state_dict(checkpoint_model, strict=False)
-    #print(msg)
+    model.load_state_dict(checkpoint_model, strict=False)
 
-    # --- 2) freeze all params
     for p in model.parameters():
         p.requires_grad = False
 
-    # --- 3a) unfreeze the patch embedding
-    # for p in model.patch_embed.parameters():
-    #     p.requires_grad = True
-
-    # --- 3b) unfreeze the last N transformer blocks
     total_blocks = len(model.blocks)
     for blk in model.blocks[total_blocks - n_trainable_layers :]:
         for p in blk.parameters():
             p.requires_grad = True
 
-    # --- 3c) unfreeze the final norm
     if hasattr(model, "norm"):
         for p in model.norm.parameters():
             p.requires_grad = True
 
-    # --- 3d) unfreeze your segmentation head
     for p in model.seg_head.parameters():
         p.requires_grad = True
 
-    # sanity check
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     total     = sum(p.numel() for p in model.parameters())
     print(f"Trainable params: {trainable:,}/{total:,}")

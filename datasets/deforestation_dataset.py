@@ -10,7 +10,7 @@ from torchvision.transforms import Normalize
 import random
 
 
-Sample = Tuple[str, str]
+Sample = Tuple[str, str] # a sample is a tuple of the image path and the mask path
 
 
 def build_samples(images_dir: str, masks_dir: str) -> List[Sample]:
@@ -28,7 +28,7 @@ def compute_stats(samples: List[Sample],
                   stats_path: str = "stats.npz"
                  ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
-    Loads or computes population mean/std over the given samples
+    Loads or computes population mean/std over the given samples.
     """
     if os.path.exists(stats_path):
         data = np.load(stats_path)

@@ -115,18 +115,16 @@ class Generator:
         """
         labels = load_labels(subset=subset, object_based_augmentation=True)
 
-        all_samples = build_samples(
+        samples = build_samples(
             images_dir=os.getenv("MASKED_IMAGES_PATH"),
             masks_dir=os.getenv("MASKED_IMAGES_PATH"),
 
         )
 
-        samples = random.sample(all_samples, 5)
-
         all_object_masks = []
         for img_path, _ in samples:
             image_name = os.path.basename(img_path)
-            if image_name not in labels:
+            if image_name not in labels: 
                 continue  # no annotated polygons for this image
 
             with rasterio.open(img_path) as src:
@@ -377,7 +375,6 @@ class Generator:
             tuple: The augmented image and mask.
         """
         self.flag_as_augm = False
-        self.extracted_objects = self._extract_objects()
 
         # -------------------------------------------------------------------
         # find the background
