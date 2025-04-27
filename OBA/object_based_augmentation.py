@@ -400,7 +400,7 @@ class Generator:
 # Function to create a tensor OBA dataset
 # -------------------------------------------------------------------
 def create_OBA_tensor_dataset(
-    prob_of_OBA=0.0,
+    prob_of_OBA=0.5,
     subset=False,
     augm=True,
     object_augm=True,
