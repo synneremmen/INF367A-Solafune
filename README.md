@@ -53,6 +53,7 @@ BACKGROUND_IMAGES_PATH = path/to/background_images/
 
 ## File Structure
 
+```plaintext
 project/
 ├── main.py
 ├── exploratory_data_analysis.ipynb
@@ -98,6 +99,7 @@ project/
     ├── simple_convnet.py
     ├── resnet.py
     └── UNet.py
+```
 
 ## Dataset
 
