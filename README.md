@@ -8,10 +8,10 @@ This project is a submission to [Solafune competition](https://solafune.com/comp
 Create an .env file with the following information:
 
 ```plaintext
-LABELS_PATH=path/to/labels
-IMAGES_PATH=path/to/images
-MASKED_IMAGES_PATH=path/to/masked/images
-EVAL_IMAGES_PATH=path/to/evaluation/images
+LABELS_PATH = path/to/labels/
+IMAGES_PATH = path/to/images/
+MASKED_IMAGES_PATH = path/to/masked/images/
+EVAL_IMAGES_PATH = path/to/evaluation/images/
 ```
 
 If training using a subset, these are also required:
@@ -28,6 +28,13 @@ If training with superresolution images
 SR_IMAGES_PATH = path/to/superresolved_images
 SR_20M_PATH = path/to/superresolution_20m_model
 SR_60M_PATH = path/to/superresolution_60m_model
+```
+
+If training with object-based augmentation
+```plaintext
+OBA_IMAGES_PATH = path/to/oba_images_path/
+OBA_MASKED_IMAGES_PATH = path/to/oba_masked_images_path/
+BACKGROUND_IMAGES_PATH = path/to/background_images/
 ```
 
 ## Project Description
@@ -57,6 +64,8 @@ CNN, ect, Using a combination of remote sensing data and advanced machine learni
 Run the following code:
 
 ```bash
+git clone <repository-url>
+cd <repository-folder>
 pip install -r requirements.txt
 ```
 

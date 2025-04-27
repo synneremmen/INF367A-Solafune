@@ -68,7 +68,7 @@ def main(model_selection=False, subset=False):
 
     elif model_selection:
         # perform model selection with hyperparameter search on different models and/or with different datasets
-        for dataset in ["normal", "OBA", "SR", "SR_OBA"]:
+        for dataset in ["SR"]:# ["normal", "OBA", "SR", "SR_OBA"]:
             print(f"\n\nModel selection on {dataset} dataset...")
             
             if dataset == "SR":
@@ -77,7 +77,7 @@ def main(model_selection=False, subset=False):
                 if not os.path.exists(image_path):
                     sr_script = os.path.join(
                         os.path.dirname(__file__),
-                        "utils",
+                        "SR",
                         "superresolution.py"
                     )
                     subprocess.run([sys.executable, sr_script], check=True)
