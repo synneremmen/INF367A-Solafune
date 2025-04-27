@@ -22,33 +22,19 @@ torch.set_default_dtype(torch.double)
 
 IMAGES_PATH = os.getenv("IMAGES_PATH")
 MASKED_IMAGES_PATH = os.getenv("MASKED_IMAGES_PATH")
-IMAGES_SUBSET_PATH = os.getenv("IMAGES_SUBSET_PATH")
-MASKED_IMAGES_SUBSET_PATH = os.getenv("MASKED_IMAGES_SUBSET_PATH")
 OBA_IMAGES_PATH = os.getenv("OBA_IMAGES_PATH")
 OBA_MASKED_IMAGES_PATH = os.getenv("OBA_MASKED_IMAGES_PATH")
 
-def main(subset=False):
+def main():
     """
-    Main function to train and/or evaluate a model. Can be used for model selection with hyperparameter search 
-    or to train a single model.
-    Args:
-        model_selection (bool): If True, perform model selection with hyperparameter search.
-        subset (bool): If True, use a subset of the data for training and evaluation.
+    Main function for model selection with hyperparameter search 
     """
     loss_fn = nn.CrossEntropyLoss(ignore_index=0)
     n_epochs = 30
     batch_size = 8
-    MODEL_PATH = None#"models/UNet_normal_paramset_0.001_0.01_0.9.pth"
-
-    if subset:
-        image_path = IMAGES_SUBSET_PATH
-        masked_image_path = MASKED_IMAGES_SUBSET_PATH
-    else:
-        image_path = IMAGES_PATH
-        masked_image_path = MASKED_IMAGES_PATH
 
     # perform model selection with hyperparameter search on different models and/or with different datasets
-    for dataset in ["normal", "SR"]:# ["normal", "OBA", "SR", "SR_OBA"]:
+    for dataset in ["SR"]:
         print(f"\n\nModel selection on {dataset} dataset...")
         
         if dataset == "SR":
@@ -101,11 +87,11 @@ def main(subset=False):
             "SimpleConvNet": SimpleConvNet,
             "UNet": UNet,
             "UNetResNet18": UNetResNet18,
-            # "ViT-finetune": partial(  # refers to finetune ViT-large 
-            #     make_vit_finetune,
-            #     ckpt_path="satmae_pp/checkpoint_ViT-L_pretrain_fmow_sentinel.pth",
-            #     n_trainable_layers=2
-            # )
+            "ViT-finetune": partial(  # refers to finetune ViT-large 
+                make_vit_finetune,
+                ckpt_path="satmae_pp/checkpoint_ViT-L_pretrain_fmow_sentinel.pth",
+                n_trainable_layers=2
+            )
         }
 
         # For testing
@@ -137,4 +123,4 @@ def main(subset=False):
         print("\n\nModel selection and evaluation completed.\n\n")
 
 if __name__ == "__main__":
-    main(subset=False)
+    main()
