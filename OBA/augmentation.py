@@ -9,6 +9,11 @@ from albumentations import (
     Lambda,
 )
 
+def add_noise(image, **kwargs):
+    return image + np.random.normal(0, 0.01, image.shape).astype(image.dtype)
+
+def scale_brightness(image, **kwargs):
+    return image * np.random.uniform(0.9, 1.1)
 
 def aug(p, color_aug_prob, geometric_aug_prob):
     return Compose(
@@ -24,14 +29,8 @@ def aug(p, color_aug_prob, geometric_aug_prob):
             ),
             OneOf(
                 [
-                    Lambda(
-                        image=lambda x, **kwargs: x
-                        + np.random.normal(0, 0.01, x.shape).astype(np.float32)
-                    ),
-                    Lambda(
-                        image=lambda x, **kwargs: x
-                        * np.random.uniform(0.9, 1.1, x.shape).astype(np.float32)
-                    ),
+                    Lambda(image=add_noise),
+                    Lambda(image=scale_brightness),
                 ],
                 p=color_aug_prob,
             ),
@@ -55,6 +54,6 @@ def augment(img, mask, augm_prob=0.9, color_aug_prob=0.6, geometric_aug_prob=0.6
 
     # transpose the image back to (12, 1024, 1024)
     augmented["image"] = augmented["image"].transpose(2, 0, 1).astype(np.float64)
-    augmented["mask"] = augmented["mask"].astype(np.float64)
+    augmented["mask"] = augmented["mask"].astype(np.float64) 
 
     return augmented["image"], augmented["mask"]
