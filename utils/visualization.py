@@ -18,6 +18,8 @@ IMAGES_PATH = os.getenv("IMAGES_PATH")
 MASKED_IMAGES_PATH = os.getenv("MASKED_IMAGES_PATH")
 PREDICTIONS_PATH = os.getenv("PREDICTIONS_PATH")
 EVAL_IMAGES_PATH = os.getenv("EVAL_IMAGES_PATH")
+OBA_IMAGES_PATH = os.getenv("OBA_IMAGES_PATH")
+OBA_MASKED_IMAGES_PATH = os.getenv("OBA_MASKED_IMAGES_PATH")
 
 # ---------------------------------------------------------------
 # Helper functions
@@ -71,26 +73,37 @@ def get_subplot_grid(num_plots, max_cols=4):
 # Plotting functions
 # ---------------------------------------------------------------
 
-def plot_image(filename, num_plots=2, band=5, no_nan=False, polygons=True):
+def plot_image(filename, num_plots=2, band=5, no_nan=False, polygons=True, from_oba=False):
     """Plot a single image with or without annotations."""
     os.chdir(os.path.join(os.path.dirname(__file__), '..'))
     labels = get_json(LABELS_PATH)
     annotations = find_annotations(labels, filename)
 
-    if not annotations:
+    if from_oba:
+        path = os.path.join(OBA_IMAGES_PATH, filename)
+        annotations = None
+    else:
+        path = os.path.join(IMAGES_PATH, filename)
+
+    if not annotations and not from_oba:
         print(f"No annotations found for {filename}")
         return
     
-    with rasterio.open(os.path.join(IMAGES_PATH, filename)) as src:
+    
+    with rasterio.open(path) as src:
         rows, cols = get_subplot_grid(num_plots)
         fig, ax = plt.subplots(rows, cols, figsize=(cols * 5, rows * 5))
         ax = ax.flatten() if num_plots > 1 else [ax]
 
-        unique = ', '.join(get_unique_classes(annotations))
-        fig.suptitle(
-            f"{filename} | Class(es): {unique}" + (" | NaNs masked" if no_nan else ""),
-            fontsize=18, fontweight='bold'
-        )
+        if not from_oba:
+            unique = ', '.join(get_unique_classes(annotations))
+
+            fig.suptitle(
+                f"{filename} | Class(es): {unique}" + (" | NaNs masked" if no_nan else ""),
+                fontsize=18, fontweight='bold'
+            )
+        else:
+            fig.suptitle(f"{filename} | No annotations", fontsize=18, fontweight='bold')
 
         for i in range(num_plots):
             band_idx = ((band - 1 + i) % src.count) + 1
@@ -127,10 +140,18 @@ def plot_images(folder, type="train", amount=10, num_plots=2, band=5):
             print(f'{filename} is not a .tif file.')
 
 
-def plot_masked_image(filename):
+def plot_masked_image(filename, from_oba=False):
     """Plot the mask for an image with class mapping."""
     os.chdir(os.path.join(os.path.dirname(__file__), '..'))
-    path = os.path.join(MASKED_IMAGES_PATH, filename)
+    if from_oba:
+        path = os.path.join(OBA_MASKED_IMAGES_PATH, filename)
+    else:
+        path = os.path.join(MASKED_IMAGES_PATH, filename)
+    
+    if not os.path.exists(path):
+        print(f"Could not find file: {path}")
+        return
+    
     with rasterio.open(path) as src:
         mask_data = src.read(1)
 
