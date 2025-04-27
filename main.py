@@ -48,7 +48,7 @@ def main(subset=False):
         masked_image_path = MASKED_IMAGES_PATH
 
     # perform model selection with hyperparameter search on different models and/or with different datasets
-    for dataset in ["SR"]:# ["normal", "OBA", "SR", "SR_OBA"]:
+    for dataset in ["normal", "SR"]:# ["normal", "OBA", "SR", "SR_OBA"]:
         print(f"\n\nModel selection on {dataset} dataset...")
         
         if dataset == "SR":
@@ -98,18 +98,13 @@ def main(subset=False):
         #     'mom': [0.9, 0.99],
         # }
         models = {
-            #"SimpleConvNet": SimpleConvNet,
-            #"UNet": UNet,
-            #"UNetResNet18": UNetResNet18,
-            "ViT-finetune": partial(  # refers to finetune ViT-large 
-                make_vit_finetune,
-                ckpt_path="satmae_pp/checkpoint_ViT-L_pretrain_fmow_sentinel.pth",
-                n_trainable_layers=2
-            )#,
-            # "ViT-finetune": partial(
+            "SimpleConvNet": SimpleConvNet,
+            "UNet": UNet,
+            "UNetResNet18": UNetResNet18,
+            # "ViT-finetune": partial(  # refers to finetune ViT-large 
             #     make_vit_finetune,
             #     ckpt_path="satmae_pp/checkpoint_ViT-L_pretrain_fmow_sentinel.pth",
-            #     n_trainable_layers=3
+            #     n_trainable_layers=2
             # )
         }
 
