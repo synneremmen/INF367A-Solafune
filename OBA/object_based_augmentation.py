@@ -124,7 +124,7 @@ class Generator:
         for file_name in images.keys():
             if file_name not in labels: 
                 continue  # no annotated polygons for this image
-            print(f"Extracting objects from {file_name}...")
+
             with rasterio.open(os.path.join(IMAGES_PATH, file_name)) as src:
                 image     = src.read().astype(np.float32)  # (C, H, W)
                 height, width = src.height, src.width
@@ -170,6 +170,7 @@ class Generator:
 
         # read image
         image_path = os.path.join(IMAGES_PATH, image_name)
+        print("image_path: ", image_path)
         with rasterio.open(image_path) as src:
             image = src.read()
 
@@ -452,6 +453,7 @@ def create_OBA_tensor_dataset(
         color_augm_prob (float): Probability of applying color augmentation.
         batch_size (int): Batch size for the dataset.
         min_area (int): Minimum area for the objects to be considered.
+        use_SR (bool): Whether to use super-resolution images.
     Returns:
         TensorDataset: A dataset containing the augmented samples.
     """
@@ -544,13 +546,20 @@ def create_save_OBA_images( # fordi vi hadde for liten RAM
         min_area=min_area,
     )
 
-    os.makedirs(OBA_IMAGES_PATH, exist_ok=True)
+    # Create folder if it does not exist, else remove old files
     if not os.path.exists(OBA_IMAGES_PATH):
         os.makedirs(OBA_IMAGES_PATH)
+    else:
+        for file in os.listdir(OBA_IMAGES_PATH):
+            if file.startswith("OBA"):
+                os.remove(os.path.join(OBA_IMAGES_PATH, file))
 
-    os.makedirs(OBA_MASKED_IMAGES_PATH, exist_ok=True)
     if not os.path.exists(OBA_MASKED_IMAGES_PATH):
         os.makedirs(OBA_MASKED_IMAGES_PATH)
+    else:
+        for file in os.listdir(OBA_MASKED_IMAGES_PATH):
+            if file.startswith("OBA"):
+                os.remove(os.path.join(OBA_MASKED_IMAGES_PATH, file))
 
     # set parameters
     generator.augm = augm

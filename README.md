@@ -30,6 +30,12 @@ SR_20M_PATH = path/to/superresolution_20m_model
 SR_60M_PATH = path/to/superresolution_60m_model
 ```
 
+If training with object-based augmentation
+```plaintext
+OBA_IMAGES_PATH = path/to/superresolved_images
+OBA_M_IMAGES_PATH = path/to/superresolution_20m_model
+```
+
 ## Project Description
 
 As described in the competition deforestation is when previously forested areas are turned into non-forrested. This is usually due to human activity were forested areas are turned into cultivated land in some manor.
@@ -57,6 +63,8 @@ CNN, ect, Using a combination of remote sensing data and advanced machine learni
 Run the following code:
 
 ```bash
+git clone <repository-url>
+cd <repository-folder>
 pip install -r requirements.txt
 ```
 
