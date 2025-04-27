@@ -56,8 +56,8 @@ class VisionTransformerSeg(_VisionTransformer):
         )
 
 
-def vit_seg_large_patch16(num_classes, patch_size, img_size, in_chans, ckpt_path, n_trainable_layers:int=4,**kwargs):
-    model = VisionTransformerSeg(
+def vit_seg_large_patch16(num_classes, patch_size, img_size, in_chans, **kwargs):
+    return VisionTransformerSeg(
         embed_dim=1024, depth=24, num_heads=16, mlp_ratio=4, qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6),
         num_classes=num_classes,
@@ -66,6 +66,15 @@ def vit_seg_large_patch16(num_classes, patch_size, img_size, in_chans, ckpt_path
         in_chans=in_chans,
         **kwargs
     )
-    freeze_layers(model, n_trainable_layers=n_trainable_layers, ckpt_path=ckpt_path)
-    return model
 
+def make_vit_finetune(
+    num_classes, patch_size, img_size, in_chans,
+    ckpt_path, n_trainable_layers
+):
+    model = vit_seg_large_patch16(
+        num_classes=num_classes,
+        patch_size=patch_size,
+        img_size=img_size,
+        in_chans=in_chans
+    )
+    return freeze_layers(model, n_trainable_layers=n_trainable_layers, ckpt_path=ckpt_path)

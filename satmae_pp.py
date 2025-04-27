@@ -146,15 +146,15 @@ def freeze_layers(
 
     # load pre-trained model
     msg = model.load_state_dict(checkpoint_model, strict=False)
-    print(msg)
+    #print(msg)
 
     # --- 2) freeze all params
     for p in model.parameters():
         p.requires_grad = False
 
     # --- 3a) unfreeze the patch embedding
-    for p in model.patch_embed.parameters():
-        p.requires_grad = True
+    # for p in model.patch_embed.parameters():
+    #     p.requires_grad = True
 
     # --- 3b) unfreeze the last N transformer blocks
     total_blocks = len(model.blocks)
@@ -174,6 +174,6 @@ def freeze_layers(
     # sanity check
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     total     = sum(p.numel() for p in model.parameters())
-    print(f" 🔥 Trainable params: {trainable:,}/{total:,}")
+    print(f"Trainable params: {trainable:,}/{total:,}")
 
     return model

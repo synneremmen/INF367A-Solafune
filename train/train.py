@@ -24,8 +24,8 @@ def train(model, optimizer, loss_fn, train_loader,val_loader=None, device="cuda"
 
         model.train()
         for imgs, labels in train_loader:
-            imgs = imgs.to(device)
-            labels = labels.to(device)
+            imgs = imgs.to(device, non_blocking=True)
+            labels = labels.to(device, non_blocking=True)
 
             ### commented out to if not using autocast 
             # # Normal training
