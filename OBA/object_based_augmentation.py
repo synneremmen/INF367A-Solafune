@@ -194,7 +194,7 @@ class Generator:
 
                 all_object_masks.append((file_name, image, mask, obj_id))
 
-        print(f"Extracted {len(all_object_masks)} objects from {len(file_name)} files.")
+        print(f"Extracted {len(all_object_masks)} objects from files.")
         return all_object_masks
 
     def _crop_target_object(self, object_id: int):
