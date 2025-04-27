@@ -35,6 +35,8 @@ This project adapts the pretrained DSen2 model to super-resolve GeoTIFF images w
 
 <img width="800" alt="superresolved_image" src="superres6xresults.png">
 
+Plot of 6x superresolution results train 0.tif.  
+Leftmost 10m GSD RGB (B2, B3, B4), middle 20m GSD B9, rightmost superresolved band B9.
 
 ## Installation and Setup
 

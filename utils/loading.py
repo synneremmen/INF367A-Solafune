@@ -55,7 +55,7 @@ def load_images(subset=False, use_SR=False, type="train"):
         path = SR_IMAGES_PATH
         if not os.path.exists(path):
             sys.path.append(os.path.abspath(".."))
-            subprocess.run(["python", os.path.join(os.path.dirname(__file__), "superresolution.py")], check=True)
+            subprocess.run(["python", os.path.join(os.path.dirname(__file__),"..", "SR", "superresolution.py")], check=True)
 
     elif type == "train":
         if subset:
