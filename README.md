@@ -1,7 +1,17 @@
 # INF367A-Identifying Deforestation drivers
 
-This project is a submission to [Solafune competition](https://solafune.com/competitions/68ad4759-4686-4bb3-94b8-7063f755b43d?menu=about&tab=&topicId=a5e978e7-7759-4433-b1a5-063760451ff5).
+This project contains our submission to [Solafune competition](https://solafune.com/competitions/68ad4759-4686-4bb3-94b8-7063f755b43d?menu=about&tab=&topicId=a5e978e7-7759-4433-b1a5-063760451ff5).
 
+
+## Project Description
+
+As described in the competition deforestation is when previously forested areas are turned into non-forrested. This is usually due to human activity were forested areas are turned into cultivated land in some manor.
+
+This heavily affets rainforest such as the amazons. The competition wishes to identify deforestation drivers by using drone images.
+
+The project also contains 3 individuals implementations:
+
+## File Structure
 
 ## Create .env
 
@@ -36,12 +46,6 @@ OBA_IMAGES_PATH = path/to/oba_images_path/
 OBA_MASKED_IMAGES_PATH = path/to/oba_masked_images_path/
 BACKGROUND_IMAGES_PATH = path/to/background_images/
 ```
-
-## Project Description
-
-As described in the competition deforestation is when previously forested areas are turned into non-forrested. This is usually due to human activity were forested areas are turned into cultivated land in some manor.
-
-This heavily affets rainforest such as the amazons. The competition wishes to identify deforestation drivers by using drone images.
 
 ## Dataset
 
