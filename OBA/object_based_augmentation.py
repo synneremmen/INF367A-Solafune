@@ -9,7 +9,7 @@ from shapely.geometry import Polygon
 import torch
 from torch.utils.data import TensorDataset
 from utils.normalize import normalize
-from utils.OBA.augmentation import augment
+from OBA.augmentation import augment
 from utils.loading import load_images, load_labels, load_masked_images
 from dotenv import load_dotenv
 from datasets.deforestation_dataset import DeforestationDataset, build_samples
