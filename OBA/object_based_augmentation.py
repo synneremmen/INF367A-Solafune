@@ -223,6 +223,7 @@ class Generator:
         return cropped_image, cropped_mask
     
     def _tight_crop_object(self, temp_image, temp_mask, object_image, object_mask):
+
         ys, xs = np.where(object_mask > 0)
         if len(xs) == 0 or len(ys) == 0:
             return None, None
@@ -316,7 +317,7 @@ class Generator:
 
                     tested_temp_image, tested_temp_mask = self._tight_crop_object(temp_image, temp_mask, cropped_obj, cropped_mask)
                     
-                    if temp_image is None: # if the object does not fit
+                    if tested_temp_image is None: # if the object does not fit
                         continue
 
                     temp_image = tested_temp_image
