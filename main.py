@@ -49,12 +49,12 @@ def main():
                 subprocess.run([sys.executable, sr_script], check=True)
 
         elif dataset == "OBA":
-            #create_save_OBA_images(subset=subset) # create new OBA images each time for randomness
+            create_save_OBA_images() # create new OBA images each time for randomness
             image_path = os.getenv("OBA_IMAGES_PATH")
             masked_image_path = os.getenv("OBA_MASKED_IMAGES_PATH")
 
         elif dataset == "SR_OBA":
-            #create_save_OBA_images(subset=subset, use_SR=True) # create new OBA images each time for randomness
+            create_save_OBA_images(use_SR=True) # create new OBA images each time for randomness
             image_path = os.getenv("SR_OBA_IMAGES_PATH")
             masked_image_path = os.getenv("SR_OBA_MASKED_IMAGES_PATH")
         else:
@@ -77,12 +77,11 @@ def main():
         print("Size of validation dataset: ", len(val_loader.dataset))
         print("Size of test dataset: ", len(test_loader.dataset))
 
-        # For når vi leverer koden
-        # param_grid = {
-        #     'lr': [0.1, 0.001],
-        #     'decay': [0.01, 0.001],
-        #     'mom': [0.9, 0.99],
-        # }
+        param_grid = {
+            'lr': [0.1, 0.001],
+            'decay': [0.01, 0.001],
+            'mom': [0.9, 0.99],
+        }
         models = {
             "SimpleConvNet": SimpleConvNet,
             "UNet": UNet,

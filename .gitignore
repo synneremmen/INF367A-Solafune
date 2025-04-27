@@ -177,7 +177,8 @@ cython_debug/
 /data
 /loaded
 
-# custom project files
-satmae_pp-main/
 
 checkpoint_ViT-L_pretrain_fmow_sentinel.pth
+
+# Ignore PyTorch model weights
+*.pth
