@@ -16,7 +16,8 @@ from datasets.deforestation_dataset import DeforestationDataset, build_samples
 
 load_dotenv()
 IMAGES_PATH = os.getenv("IMAGES_PATH")
-
+OBA_IMAGE_PATH = os.getenv("OBA_IMAGE_PATH")
+OBA_MASKED_IMAGES_PATH = os.getenv("OBA_MASKED_IMAGES_PATH")
 
 class Generator:
     def __init__(
@@ -118,7 +119,6 @@ class Generator:
         samples = build_samples(
             images_dir=os.getenv("MASKED_IMAGES_PATH"),
             masks_dir=os.getenv("MASKED_IMAGES_PATH"),
-
         )
 
         all_object_masks = []
@@ -203,9 +203,11 @@ class Generator:
             with rasterio.open(IMAGES_PATH + "/" + rnd_choice) as src:
                 background = src.read()
                 background = np.nan_to_num(background, nan=0.0)
+                profile = src.profile
+
 
             mask = self.masks[rnd_choice]["image"][0]  # mask has shape (1, 1024, 1024)
-        return background, mask, rnd_choice
+        return background, mask, rnd_choice, profile
 
     def _prepare_image_and_mask(self, background, init_mask):
         """
@@ -379,7 +381,7 @@ class Generator:
         # -------------------------------------------------------------------
         # find the background
         # -------------------------------------------------------------------
-        background, init_mask, rnd_choice = self._find_background()
+        background, init_mask, rnd_choice, profile = self._find_background()
         image, mask = self._prepare_image_and_mask(background, init_mask)
 
         if random.random() < self.background_augm_prob and self.augm:
@@ -413,19 +415,19 @@ class Generator:
 
         # self.visualize(background[5], init_mask)
         # self.visualize(image[5], mask)
-        return image, mask
+        return image, mask, profile
 
 
 # -------------------------------------------------------------------
 #  Create OBA dataset
 # -------------------------------------------------------------------
-def create_OBA_dataset(
-    prob_of_OBA=0.5,
+def create_OBA_tensor_dataset(
+    prob_of_OBA=0.,
     subset=False,
     augm=True,
-    object_augm=False,
+    object_augm=True,
     extra_background_prob=0,
-    background_augm_prob=0,
+    background_augm_prob=0.6,
     shadows=False,
     extra_objects=3,
     object_augm_prob=0,
@@ -513,3 +515,80 @@ def create_OBA_dataset(
     )
 
     return TensorDataset(x_train_tensor, y_train_tensor)
+
+
+def create_save_OBA_images( # fordi vi hadde for liten RAM
+    prob_of_OBA=0.,
+    subset=False,
+    augm=True,
+    object_augm=True,
+    extra_background_prob=0,
+    background_augm_prob=0.6,
+    shadows=False,
+    extra_objects=3,
+    object_augm_prob=0,
+    augm_prob=0.8,
+    geometric_augm_prob=0.6,
+    color_augm_prob=0.6,
+    batch_size=10,
+    min_area=1000,
+    use_SR=False,
+):
+    
+    x_train_dict = load_images(subset=subset, use_SR=use_SR)
+    y_train_dict = load_masked_images(subset=subset)
+
+    generator = Generator(
+        batch_size=batch_size,
+        masked_images=y_train_dict,
+        images=x_train_dict,
+        subset=subset,
+        min_area=min_area,
+    )
+
+    os.makedirs(OBA_IMAGE_PATH, exist_ok=True)
+    if not os.path.exists(OBA_IMAGE_PATH):
+        os.makedirs(OBA_IMAGE_PATH)
+
+    # set parameters
+    generator.augm = augm
+    generator.object_augm = object_augm
+    generator.extra_background_prob = extra_background_prob
+    generator.background_augm_prob = background_augm_prob
+    generator.shadows = shadows
+    generator.extra_objects = extra_objects
+    generator.object_augm_prob = object_augm_prob
+    generator.augm_prob = augm_prob
+    generator.geometric_augm_prob = geometric_augm_prob
+    generator.color_augm_prob = color_augm_prob
+
+    num = 0
+    # generate sample by a given probability
+    for _ in range(len(x_train_dict.items())):
+        if random.random() < prob_of_OBA:
+            sample_image, sample_mask, profile = generator.generate_augmented_sample()
+            if sample_image is None:
+                # if no augmentation has happened, skip this sample
+                continue
+
+            num += 1
+            sample_mask = sample_mask[
+                np.newaxis, ...
+            ]  # get correct dimensions (should be (1, 1024, 1024))
+
+            image_name = f"OBA_{num}.tif"
+            mask_name = f"OBA_{num}_mask.tif"
+
+            image_path = os.path.join(OBA_IMAGE_PATH, image_name)
+            mask_path = os.path.join(OBA_MASKED_IMAGES_PATH, mask_name)
+
+            profile.update({"count": sample_image.shape[0]})
+            with rasterio.open(image_path, "w", **profile) as dst:
+                dst.write(sample_image)
+
+            profile.update({"count": 1}) 
+            with rasterio.open(mask_path, "w", **profile) as dst:
+                dst.write(sample_mask[0], 1)
+
+            print(f"Saved {image_name} to {image_path}")
+            print(f"Saved {mask_name} to {mask_path}")

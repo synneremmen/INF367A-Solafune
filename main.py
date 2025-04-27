@@ -1,3 +1,4 @@
+from OBA.object_based_augmentation import create_OBA_dataset, create_save_OBA_images
 from utils.evaluation import run_evaluation
 from train.train import train
 from train.loader import get_loader, get_dataset
@@ -23,6 +24,8 @@ IMAGES_PATH = os.getenv("IMAGES_PATH")
 MASKED_IMAGES_PATH = os.getenv("MASKED_IMAGES_PATH")
 IMAGES_SUBSET_PATH = os.getenv("IMAGES_SUBSET_PATH")
 MASKED_IMAGES_SUBSET_PATH = os.getenv("MASKED_IMAGES_SUBSET_PATH")
+OBA_IMAGES_PATH = os.getenv("OBA_IMAGES_PATH")
+OBA_MASKED_IMAGES_PATH = os.getenv("OBA_MASKED_IMAGES_PATH")
 
 def main(model_selection=False, subset=False):
     """
@@ -68,7 +71,7 @@ def main(model_selection=False, subset=False):
         for dataset in ["OBA"]:# ["normal", "OBA", "SR", "SR_OBA"]:
             print(f"\n\nModel selection on {dataset} dataset...")
             
-            if dataset == "SR" or dataset == "SR_OBA":
+            if dataset == "SR":
                 image_path = os.getenv("SR_IMAGES_PATH")
                 if not os.path.exists(image_path):
                     sr_script = os.path.join(
@@ -78,14 +81,24 @@ def main(model_selection=False, subset=False):
                     )
                     subprocess.run([sys.executable, sr_script], check=True)
 
+            elif dataset == "OBA":
+                create_save_OBA_images(subset=subset) # create new OBA images each time for randomness
+                image_path = os.getenv("OBA_IMAGES_PATH")
+                masked_image_path = os.getenv("OBA_MASKED_IMAGES_PATH")
+
+            elif dataset == "SR_OBA":
+                create_save_OBA_images(subset=subset, use_SR=True) # create new OBA images each time for randomness
+                image_path = os.getenv("OBA_IMAGES_PATH")
+                masked_image_path = os.getenv("OBA_MASKED_IMAGES_PATH")
+
             else:
                 image_path = image_path
 
             oba_generator = None
-            if dataset == "OBA" or dataset == "SR_OBA":
-                print("Using OBA generator for augmentation...")
-                oba_generator = Generator(batch_size=batch_size)
-                print("Finished creating OBA generator...")
+            # if dataset == "OBA" or dataset == "SR_OBA":
+            #     print("Using OBA generator for augmentation...")
+            #     oba_generator = Generator(batch_size=batch_size)
+            #     print("Finished creating OBA generator...")
 
             train_loader, val_loader, test_loader = build_datasets(
                 images_dir=image_path,
