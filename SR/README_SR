@@ -1,18 +1,36 @@
-# DSen2 - Implemented for GeoTIFF using pretrained weights(superresolution.py)
+# Super-Resolution: DSen2 - Implemented for GeoTIFF using pretrained weights(superresolution.py)
 
 ## Overview
 
-DSen2 the superresolution network was introdudiced in paper, and works by training two neural nets one for superresoving from 20m and another for 60m. We therefore need to download to pretrained wiegs. 
-Sentinel-2A satellite imagery contains 12 spectral bands, acquired at three different resolutions, referred to as ground sampling distances (GSDs). 10m, 20m and 60m the higher the GSD the more blurry and lack of detail the band has.
-We therefore want to use a super-resolution tool such as DSen2 to superresolve the lower resolution band.
-There are other ways to upsample, but DSen2 does something which was novel at the time if we have a multiband image then we use that image
+DSen2 is a super-resolution network introduced in the paper "Super-resolution of Sentinel-2 images: Learning a globally applicable deep neural network".
+It works by training two neural networks: one for super-resolving 20m bands and another for 60m bands.
 
-The orginal authors do have their code published, but this is implemented in Keras and only works on real Sentinel-2A products in a hieracrhicl .safe folder format which contains metadata which we do notr have with our GeoTIFF.
-RSP have made a pytorch implementation of DSen2, but this also only works on .safe, but we can use the weights from this implementation for our own GeoTIFF implementation.
+Sentinel-2A satellite imagery contains 12 spectral bands, acquired at three different ground sampling distances (GSDs): 10m, 20m, and 60m. The higher the GSD, has lower resolution (more blur and less detail).
+To improve the quality of the lower-resolution bands, we can use a super-resolution model like DSen2.
 
-## Method
+While simple interpolation methods exist, DSen2 introduced a novel approach at the time: using the available high-resolution bands for each image as information to guide the super-resolution of the lower-resolution bands.
 
-I desrcibe my implementaion of the method into the project here.
+The original authors published their code in Keras, but it was designed for .SAFE Sentinel-2A products, which include extensive metadata and hierarchical folder structures that are not present in our GeoTIFF data.
+
+The Remote-Sensing-Processor (RSP) also reimplemented DSen2 in PyTorch, but this version still expects .SAFE products.
+This project adapts the pretrained weights from RSP and implements a version of DSen2 that works directly with GeoTIFF files.
+
+## Method superresolution.py
+
+This project adapts the pretrained DSen2 model to super-resolve GeoTIFF images without relying on the .SAFE structure.
+
+    The superresolution.py script loads pretrained weights for both 20m and 60m models.
+
+    GeoTIFF files are read, and the bands are separated based on their original GSDs.
+
+    Bands at 20m and 60m resolution are super-resolved using the respective models.
+
+    Super-resolved bands are combined with native 10m bands to produce a fully super-resolved output.
+
+    Outputs are saved according to the paths specified in the .env configuration file.
+
+    The super-resolution step can be run standalone (superresolution.py) or integrated into the full processing pipeline (main.py using mode="SR").
+
 
 ## Installation and Setup
 
@@ -22,6 +40,7 @@ I desrcibe my implementaion of the method into the project here.
 
 2. **Download the pretrained weights from (https://doi.org/10.5281/zenodo.11091321)**
 
+    location of weights in repository:
     src/
         remote_sensing_processor/
             sentinel2/
@@ -30,9 +49,12 @@ I desrcibe my implementaion of the method into the project here.
                         L2A20M.pt
                         L2A60M.pt
 
-    Place the weights in the environment
+    Location of the weights is not important as long as you follow the next step correctly
 
 3. **Add the required paths in .env**
+
+    In the superresolution.py do i refer to these paths to get weights
+    and save location for the superresolved images
 
     ```
     IMAGES_PATH=path/to/images
@@ -48,9 +70,9 @@ I desrcibe my implementaion of the method into the project here.
 
 ## Usage
 
-Implemented for GeoTIFF instead of the orginal Sentinel-2A product.
-Superresolves whole folder of GeoTIFF Sentinel-2A images, using pretrained weights.
-These are then saved using the desired path from .env.
+This implementation is designed for standalone GeoTIFF Sentinel-2A images in a folder (IMAGES_PATH).
+It superresolves all images in the specified folder using the pretrained DSen2 weights
+and saves the outputs according to the .env settings (SR_IMAGES_PATH.)
 
 ## Citation
 
