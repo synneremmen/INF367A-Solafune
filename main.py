@@ -21,7 +21,8 @@ torch.set_default_dtype(torch.double)
 
 IMAGES_PATH = os.getenv("IMAGES_PATH")
 MASKED_IMAGES_PATH = os.getenv("MASKED_IMAGES_PATH")
-
+IMAGES_SUBSET_PATH = os.getenv("IMAGES_SUBSET_PATH")
+MASKED_IMAGES_SUBSET_PATH = os.getenv("MASKED_IMAGES_SUBSET_PATH")
 
 def main(model_selection=False, subset=False):
     """
@@ -34,18 +35,25 @@ def main(model_selection=False, subset=False):
     loss_fn = nn.CrossEntropyLoss(ignore_index=0)
     n_epochs = 30
     batch_size = 8
-    MODEL_PATH = None #"models/SimpleConvNet_paramset_0.001_0.01_0.9.pth"
+    MODEL_PATH = "models/UNet_normal_paramset_0.001_0.01_0.9.pth"
+
+    if subset:
+        image_path = IMAGES_SUBSET_PATH
+        masked_image_path = MASKED_IMAGES_SUBSET_PATH
+    else:
+        image_path = IMAGES_PATH
+        masked_image_path = MASKED_IMAGES_PATH
 
     if MODEL_PATH and os.path.exists(MODEL_PATH):
         # use saved model if it exists
         print("\n\nLoading saved model...")
 
-        model = SimpleConvNet().to(DEVICE)  # SimpleConvNet().to(DEVICE) # UNet().to(DEVICE) # UNetResNet18().to(DEVICE)
+        model = UNet().to(DEVICE)  # SimpleConvNet().to(DEVICE) # UNet().to(DEVICE) # UNetResNet18().to(DEVICE)
         model.load_state_dict(torch.load(MODEL_PATH, weights_only=True, map_location=DEVICE))
 
         train_loader, val_loader, test_loader = build_datasets(
-            images_dir=IMAGES_PATH,
-            masks_dir=MASKED_IMAGES_PATH,
+            images_dir=image_path,
+            masks_dir=masked_image_path,
             oba_generator=None,
             num_workers=4,
             batch_size=batch_size)
@@ -71,7 +79,7 @@ def main(model_selection=False, subset=False):
                     subprocess.run([sys.executable, sr_script], check=True)
 
             else:
-                image_path = IMAGES_PATH
+                image_path = image_path
 
             oba_generator = None
             if dataset == "OBA" or dataset == "SR_OBA":
@@ -81,7 +89,7 @@ def main(model_selection=False, subset=False):
 
             train_loader, val_loader, test_loader = build_datasets(
                 images_dir=image_path,
-                masks_dir=MASKED_IMAGES_PATH,
+                masks_dir=masked_image_path,
                 oba_generator=oba_generator,
                 num_workers=24,
                 batch_size=batch_size)
@@ -136,7 +144,7 @@ def main(model_selection=False, subset=False):
 
             print("\n\nRunning evaluation...")
             torch.cuda.empty_cache()
-            run_evaluation(best_model, test_loader, device=DEVICE, save=False)
+            run_evaluation(best_model, test_loader, device=DEVICE, save=True)
             print("\n\nModel selection and evaluation completed.\n\n")
 
     else: # train a single model
@@ -150,7 +158,7 @@ def main(model_selection=False, subset=False):
         scheduler = StepLR(optimizer, step_size=10, gamma=0.1, verbose=False)
         train_loader, val_loader, test_loader = build_datasets(
             images_dir=image_path,
-            masks_dir=MASKED_IMAGES_PATH,
+            masks_dir=masked_image_path,
             oba_generator=oba_generator,
             num_workers=4,
             batch_size=batch_size)
