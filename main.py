@@ -6,13 +6,13 @@ from train.selection import train_model_selection
 from models.simple_convnet import SimpleConvNet
 from models.UNet import UNet
 from models.resnet import UNetResNet18
-from models.vit_large import vit_seg_large_patch16, make_vit_finetune
+from satmae_pp.vit_large import vit_seg_large_patch16, make_vit_finetune
 import torch
 import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR
 import os
 from datasets.deforestation_dataset import build_datasets
-from utils.OBA.object_based_augmentation import Generator
+from OBA.object_based_augmentation import Generator
 import sys
 import subprocess
 from functools import partial
