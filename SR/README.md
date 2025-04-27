@@ -31,6 +31,10 @@ This project adapts the pretrained DSen2 model to super-resolve GeoTIFF images w
 
     The super-resolution step can be run standalone (superresolution.py) or used in the train pipeline (main.py using for dataset in ["SR"]).
 
+### Results superresolving 60m GSD band B9
+
+<img width="800" alt="superresolved_image" src="superres6xresults.png">
+
 
 ## Installation and Setup
 
@@ -91,4 +95,5 @@ author = {Charis Lanaras and José Bioucas-Dias and Silvano Galliani and Emmanue
 ```
 
 > github DSen2 (orginal implementation). https://github.com/lanha/DSen2
+>
 > doi.org RemoteSensingProcessor (weights). https://doi.org/10.5281/zenodo.11091321
