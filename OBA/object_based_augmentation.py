@@ -16,7 +16,7 @@ from datasets.deforestation_dataset import DeforestationDataset, build_samples
 
 load_dotenv()
 IMAGES_PATH = os.getenv("IMAGES_PATH")
-OBA_IMAGES_PATH = os.getenv("OBA_IMAGES_PATH")
+OBA_IMAGE_PATH = os.getenv("OBA_IMAGES_PATH")
 OBA_MASKED_IMAGES_PATH = os.getenv("OBA_MASKED_IMAGES_PATH")
 
 class Generator:
