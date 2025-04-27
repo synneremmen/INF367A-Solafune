@@ -16,7 +16,7 @@ from datasets.deforestation_dataset import DeforestationDataset, build_samples
 
 load_dotenv()
 IMAGES_PATH = os.getenv("IMAGES_PATH")
-OBA_IMAGE_PATH = os.getenv("OBA_IMAGE_PATH")
+OBA_IMAGES_PATH = os.getenv("OBA_IMAGES_PATH")
 OBA_MASKED_IMAGES_PATH = os.getenv("OBA_MASKED_IMAGES_PATH")
 
 class Generator:
@@ -546,9 +546,13 @@ def create_save_OBA_images( # fordi vi hadde for liten RAM
         min_area=min_area,
     )
 
-    os.makedirs(OBA_IMAGE_PATH, exist_ok=True)
-    if not os.path.exists(OBA_IMAGE_PATH):
-        os.makedirs(OBA_IMAGE_PATH)
+    os.makedirs(OBA_IMAGES_PATH, exist_ok=True)
+    if not os.path.exists(OBA_IMAGES_PATH):
+        os.makedirs(OBA_IMAGES_PATH)
+
+    os.makedirs(OBA_MASKED_IMAGES_PATH, exist_ok=True)
+    if not os.path.exists(OBA_MASKED_IMAGES_PATH):
+        os.makedirs(OBA_MASKED_IMAGES_PATH)
 
     # set parameters
     generator.augm = augm
@@ -562,32 +566,62 @@ def create_save_OBA_images( # fordi vi hadde for liten RAM
     generator.geometric_augm_prob = geometric_augm_prob
     generator.color_augm_prob = color_augm_prob
 
-    num = 0
+    # Save all original images and masks to the OBA folder
+    for idx, (key, value) in enumerate(x_train_dict.items()):
+        image_name = f"Original_{idx + 1}.tif"
+        mask_name = f"Original_{idx + 1}_mask.tif"
+
+        image_path = os.path.join(OBA_IMAGES_PATH, image_name)
+        mask_path = os.path.join(OBA_MASKED_IMAGES_PATH, mask_name)
+
+        profile = {
+            "driver": "GTiff",
+            "height": value["image"].shape[1],
+            "width": value["image"].shape[2],
+            "count": value["image"].shape[0],
+            "dtype": value["image"].dtype,
+        }
+
+        with rasterio.open(image_path, "w", **profile) as dst:
+            dst.write(value["image"])
+
+        mask_profile = profile.copy()
+        mask_profile.update({"count": 1, "dtype": y_train_dict[key]["image"].dtype})
+        with rasterio.open(mask_path, "w", **mask_profile) as dst:
+            dst.write(y_train_dict[key]["image"][0], 1)
+
+        print(f"Saved {image_name} to {image_path}")
+        print(f"Saved {mask_name} to {mask_path}")
+
+
     # generate sample by a given probability
-    for _ in range(len(x_train_dict.items())):
+    for idx in range(len(x_train_dict.items())):
         if random.random() < prob_of_OBA:
             sample_image, sample_mask, profile = generator.generate_augmented_sample()
             if sample_image is None:
                 # if no augmentation has happened, skip this sample
                 continue
 
-            num += 1
-            sample_mask = sample_mask[
-                np.newaxis, ...
-            ]  # get correct dimensions (should be (1, 1024, 1024))
+            image_name = f"OBA_{idx + 1}.tif"
+            mask_name = f"OBA_{idx + 1}_mask.tif"
 
-            image_name = f"OBA_{num}.tif"
-            mask_name = f"OBA_{num}_mask.tif"
-
-            image_path = os.path.join(OBA_IMAGE_PATH, image_name)
+            image_path = os.path.join(OBA_IMAGES_PATH, image_name)
             mask_path = os.path.join(OBA_MASKED_IMAGES_PATH, mask_name)
 
-            profile.update({"count": sample_image.shape[0]})
+            profile.update({
+                "driver": "GTiff",
+                "height": sample_image.shape[1],
+                "width": sample_image.shape[2],
+                "count": sample_image.shape[0],
+                "dtype": sample_image.dtype,
+            })
+
             with rasterio.open(image_path, "w", **profile) as dst:
                 dst.write(sample_image)
 
-            profile.update({"count": 1}) 
-            with rasterio.open(mask_path, "w", **profile) as dst:
+            mask_profile = profile.copy()
+            mask_profile.update({"count": 1, "dtype": sample_mask.dtype})
+            with rasterio.open(mask_path, "w", **mask_profile) as dst:
                 dst.write(sample_mask[0], 1)
 
             print(f"Saved {image_name} to {image_path}")
