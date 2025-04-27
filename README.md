@@ -50,17 +50,15 @@ Evaluation_images
 
 CNN, ect, Using a combination of remote sensing data and advanced machine learning techniques, competitors will analyze satellite images to distinguish between different land-use changes that lead to deforestation, such as agricultural expansion, mining, or other factors LOREM IPSUM LOREM.
 
-## Required packages (ADD MORE IF NECESSARY)
+## Required packages
 
 [solafune-tools](https://github.com/Solafune-Inc/solafune-tools/tree/main)
 
-pytorch
+Run the following code:
 
-torchvision
-
-numpy
-
-matplotlib
+```bash
+pip install -r requirements.txt
+```
 
 ## How to run project (ADD MORE DETAIL)
 
@@ -76,5 +74,3 @@ Aurora Ingebrigtsen, Synne Remmen Andreassen, Christian Bontveit
 ## References
 
 [solafune-tools](https://github.com/Solafune-Inc/solafune-tools/tree/main) by Solafune team
-
-[solafune-baseline](https://github.com/motokimura/solafune_deforestation_baseline/tree/main) by Moto Kimura
