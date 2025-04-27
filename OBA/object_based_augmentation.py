@@ -88,7 +88,7 @@ class Generator:
     """
 
     def __init__(
-        self, batch_size, masked_images=None, images=None, extra_backgrounds=False, subset=False, min_area=100
+        self, batch_size, masked_images=None, images=None, extra_backgrounds=False, subset=False, min_area=1000
     ):
         self.masks = (
             load_masked_images(subset=subset)
@@ -392,7 +392,8 @@ class Generator:
         if self.augm and not self.flag_as_augm:
             image, mask = self._augment_image_mask(image, mask)
 
-        mask = mask[np.newaxis, ...]
+        if len(mask.shape) < 3:
+            mask = mask[np.newaxis, ...]
         return image, mask, profile
     
 # -------------------------------------------------------------------
@@ -449,7 +450,6 @@ def create_OBA_tensor_dataset(
                 continue
 
             num += 1
-            sample_mask = sample_mask[np.newaxis, ...]
             x_train_dict.update({f"OBA_{num}": {"image": sample_image}})
             y_train_dict.update({f"OBA_{num}": {"image": sample_mask}})
 
