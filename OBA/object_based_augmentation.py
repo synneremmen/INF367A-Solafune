@@ -12,8 +12,7 @@ from utils.normalize import normalize
 from OBA.augmentation import augment
 from utils.loading import load_images, load_labels, load_masked_images
 from dotenv import load_dotenv
-from datasets.deforestation_dataset import DeforestationDataset, build_samples
-
+# Removed unused import
 load_dotenv()
 IMAGES_PATH = os.getenv("IMAGES_PATH")
 OBA_IMAGES_PATH = os.getenv("OBA_IMAGES_PATH")
@@ -30,6 +29,11 @@ class Generator:
             self.masks = load_masked_images(subset=subset)
         else:
             self.masks = masked_images
+
+        if images is None:
+            self.images = load_images(subset=subset)
+        else:
+            self.images = images
 
         self.class_mapping = {
             "none": 0,
@@ -57,8 +61,8 @@ class Generator:
 
         # values for image-mask augmentation
         self.augm_prob = 0.9
-        self.geometric_augm_prob = 0.5
-        self.color_augm_prob = 0
+        self.geometric_augm_prob = 0.6
+        self.color_augm_prob = 0.6
 
         self.batch_size = batch_size
 
@@ -78,7 +82,7 @@ class Generator:
         ]
 
         self.extracted_objects = self._extract_objects(
-            images=images, min_area=min_area, subset=subset
+            images=self.images, min_area=min_area, subset=subset
         )
         self.num_of_extracted_objects = len(self.extracted_objects)
 
@@ -116,23 +120,17 @@ class Generator:
         """
         labels = load_labels(subset=subset, object_based_augmentation=True)
 
-        samples = build_samples(
-            images_dir=os.getenv("MASKED_IMAGES_PATH"),
-            masks_dir=os.getenv("MASKED_IMAGES_PATH"),
-        )
-
         all_object_masks = []
-        for img_path, _ in samples:
-            image_name = os.path.basename(img_path)
-            if image_name not in labels: 
+        for file_name in images.keys():
+            if file_name not in labels: 
                 continue  # no annotated polygons for this image
-
-            with rasterio.open(img_path) as src:
+            print(f"Extracting objects from {file_name}...")
+            with rasterio.open(os.path.join(IMAGES_PATH, file_name)) as src:
                 image     = src.read().astype(np.float32)  # (C, H, W)
                 height, width = src.height, src.width
                 transform    = Affine.identity()
 
-            for annotation, obj_id in labels[image_name]:
+            for annotation, obj_id in labels[file_name]:
                 class_value = self.class_mapping[annotation["class"]]
                 coords      = annotation["segmentation"]
                 poly_coords = [(coords[i], coords[i+1]) for i in range(0, len(coords), 2)]
@@ -148,9 +146,9 @@ class Generator:
                     fill=0,
                 )
 
-                all_object_masks.append((image_name, image, mask, obj_id))
+                all_object_masks.append((file_name, image, mask, obj_id))
 
-        print(f"Extracted {len(all_object_masks)} objects from {len(samples)} files.")
+        print(f"Extracted {len(all_object_masks)} objects from {len(file_name)} files.")
         return all_object_masks
 
     def _crop_target_object(self, object_id: int):
@@ -200,7 +198,7 @@ class Generator:
             rnd_choice = random.choice(self.background_list)
         else:
             rnd_choice = random.choice(self.file_name_list)
-            with rasterio.open(IMAGES_PATH + "/" + rnd_choice) as src:
+            with rasterio.open(IMAGES_PATH + rnd_choice) as src:
                 background = src.read()
                 background = np.nan_to_num(background, nan=0.0)
                 profile = src.profile
@@ -413,8 +411,7 @@ class Generator:
         if self.augm and not self.flag_as_augm:
             image, mask = self._augment_image_mask(image, mask)
 
-        # self.visualize(background[5], init_mask)
-        # self.visualize(image[5], mask)
+        mask = mask[np.newaxis, ...]
         return image, mask, profile
 
 
@@ -483,6 +480,7 @@ def create_OBA_tensor_dataset(
     generator.color_augm_prob = color_augm_prob
 
     num = 0
+
     # generate sample by a given probability
     for _ in range(len(x_train_dict.items())):
         if random.random() < prob_of_OBA:
@@ -518,7 +516,7 @@ def create_OBA_tensor_dataset(
 
 
 def create_save_OBA_images( # fordi vi hadde for liten RAM
-    prob_of_OBA=0.,
+    prob_of_OBA=0.5,
     subset=False,
     augm=True,
     object_augm=True,
@@ -598,10 +596,11 @@ def create_save_OBA_images( # fordi vi hadde for liten RAM
     for idx in range(len(x_train_dict.items())):
         if random.random() < prob_of_OBA:
             sample_image, sample_mask, profile = generator.generate_augmented_sample()
-            if sample_image is None:
-                # if no augmentation has happened, skip this sample
+            if sample_image is None or sample_mask is None:
+                print(f"Skipping sample {idx + 1} due to failed augmentation.")
                 continue
 
+            print("mask shape: ", sample_mask.shape)
             image_name = f"OBA_{idx + 1}.tif"
             mask_name = f"OBA_{idx + 1}_mask.tif"
 
