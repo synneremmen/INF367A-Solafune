@@ -8,21 +8,23 @@ import json
 
 class_names = ['plantation', 'logging', 'mining', 'grassland_shrubland']
 
-def outputs_to_polygons(outputs, num_channels=5, min_area=100, threshold=0.5):
+def outputs_to_polygons(outputs, num_channels=5, min_area=0, threshold=0.5):
     # Comes in the shape (B, C, H, W)
+    outputs = outputs[:, 1:, :, :] # remove first channel (None)
+    print(f"Outputs shape: {outputs.shape}")
     polygons = []
     for output in outputs: # Shape (C, H, W)
         num_channels = output.shape[0]
         polygons_by_class = {}
         
-        for class_idx in range(num_channels):
+        for class_idx in range(1,num_channels):
             class_mask = output[class_idx]
-            class_mask = (class_mask > 0.5).astype(np.uint8)
+            #class_mask = (class_mask > 0.5).astype(np.uint8)
             contours = measure.find_contours(class_mask, threshold)
             class_polygons = []
             for contour in contours:
-                if len(contour) < 4:
-                    continue
+                # if len(contour) < 4:
+                #     continue
                 # Convert (row, col) to (x, y) for Shapely.
                 poly = Polygon([(pt[1], pt[0]) for pt in contour])
                 if poly.area >= min_area and poly.is_valid:
