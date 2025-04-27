@@ -17,8 +17,43 @@ The project also contains 3 individuals implementations:
 - transfomers (SatMAE-PP)
     - location: satmae_pp/
 
+## Create .env
+
+Create an .env file with the following information:
+
+```plaintext
+LABELS_PATH = path/to/labels/
+IMAGES_PATH = path/to/images/
+MASKED_IMAGES_PATH = path/to/masked/images/
+EVAL_IMAGES_PATH = path/to/evaluation/images/
+```
+
+If training using a subset, these are also required:
+
+```plaintext
+IMAGES_SUBSET_PATH = path/to/subset/images
+MASKED_IMAGES_SUBSET_PATH = path/to/subset/images
+EVAL_IMAGES_SUBSET_PATH = path/to/evaluation/images/subset
+```
+
+If training with superresolution images
+
+```plaintext
+SR_IMAGES_PATH = path/to/superresolved_images
+SR_20M_PATH = path/to/superresolution_20m_model
+SR_60M_PATH = path/to/superresolution_60m_model
+```
+
+If training with object-based augmentation
+```plaintext
+OBA_IMAGES_PATH = path/to/oba_images_path/
+OBA_MASKED_IMAGES_PATH = path/to/oba_masked_images_path/
+BACKGROUND_IMAGES_PATH = path/to/background_images/
+```
+
 ## File Structure
 
+```plaintext
 project/
 ├── main.py
 ├── exploratory_data_analysis.ipynb
@@ -64,39 +99,6 @@ project/
     ├── simple_convnet.py
     ├── resnet.py
     └── UNet.py
-
-## Create .env
-
-Create an .env file with the following information:
-
-```plaintext
-LABELS_PATH = path/to/labels/
-IMAGES_PATH = path/to/images/
-MASKED_IMAGES_PATH = path/to/masked/images/
-EVAL_IMAGES_PATH = path/to/evaluation/images/
-```
-
-If training using a subset, these are also required:
-
-```plaintext
-IMAGES_SUBSET_PATH = path/to/subset/images
-MASKED_IMAGES_SUBSET_PATH = path/to/subset/images
-EVAL_IMAGES_SUBSET_PATH = path/to/evaluation/images/subset
-```
-
-If training with superresolution images
-
-```plaintext
-SR_IMAGES_PATH = path/to/superresolved_images
-SR_20M_PATH = path/to/superresolution_20m_model
-SR_60M_PATH = path/to/superresolution_60m_model
-```
-
-If training with object-based augmentation
-```plaintext
-OBA_IMAGES_PATH = path/to/oba_images_path/
-OBA_MASKED_IMAGES_PATH = path/to/oba_masked_images_path/
-BACKGROUND_IMAGES_PATH = path/to/background_images/
 ```
 
 ## Dataset
@@ -145,6 +147,10 @@ pip install -r requirements.txt
 
 1. Run the create_masked_data.py to get images in the masked_annotations folder. 
 These tif files contains only one band of size 1024x1024. Each pixel in the data contains the class value (0-4, where 0 is none.)
+
+2. Run create_subsets.py to get subsets of the data, this is to run some of the notebooks.
+
+3. Run main.py using different configurations: datasets, params and models.
 
 ## Contributors
 
