@@ -71,8 +71,11 @@ Leftmost 10m GSD RGB (B2, B3, B4), middle 20m GSD B9, rightmost superresolved ba
 
 4. **Details for running**
 
-    You can generate the superresolved images by running superresolution.py
-    They will also be generated if you run main.py using mode "SR"
+    - You can generate the superresolved images by running superresolution.py,
+    running from here you can continue even after interupt.
+    - They will also be generated if you run main.py using mode "SR",
+    if you have the whole dataset 176 images it will not need to rerun superresolution.py
+    but if you have an empty or uncomplete superresolved_images folder it will not run properly
 
 ## Usage
 
