@@ -179,6 +179,3 @@ cython_debug/
 
 
 checkpoint_ViT-L_pretrain_fmow_sentinel.pth
-
-# Ignore PyTorch model weights
-*.pth
