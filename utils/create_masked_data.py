@@ -6,11 +6,16 @@ from rasterio.features import rasterize
 from rasterio.transform import Affine
 from utils.loading import load_labels, load_images
 
+# -------------------------------------------------------------------
+# Script to create masked images from solafune annotations file
+# -------------------------------------------------------------------
+
 load_dotenv()
-class_mapping = {'none':0, 'plantation':1, 'logging':2, 'mining':3, 'grassland_shrubland':4}
 LABELS_PATH = os.getenv("LABELS_PATH")
 IMAGES_PATH = os.getenv("IMAGES_PATH")
 MASKED_IMAGES_PATH = os.getenv("MASKED_IMAGES_PATH")
+
+class_mapping = {'none':0, 'plantation':1, 'logging':2, 'mining':3, 'grassland_shrubland':4}
 
 os.makedirs(MASKED_IMAGES_PATH, exist_ok=True)
 
