@@ -1,5 +1,5 @@
 import sys
-from utils.OBA.object_based_augmentation import create_OBA_dataset
+from OBA.object_based_augmentation import create_OBA_tensor_dataset
 from utils.preprocessing import get_processed_data
 sys.path.append('../../..')
 from torch.utils.data import DataLoader, random_split
@@ -43,7 +43,7 @@ def get_dataset(dataset_type, subset=False):
     
     if use_OBA:
         print(f"Using OBA{' and SR' if use_SR else ''} dataset")
-        dataset = create_OBA_dataset(
+        dataset = create_OBA_tensor_dataset(
             prob_of_OBA=0.5, # how much OBA data to generate
             subset=True,
             augm=True,

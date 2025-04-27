@@ -72,8 +72,9 @@ class DeforestationDataset(Dataset):
         with rasterio.open(mask_path) as src:
             mask = src.read(1).astype(np.int64)
 
-        if self.oba_generator is not None and random.random() < self.p_aug:
-            img, mask = self.oba_generator.generate_augmented_sample()
+        # set oba augmentation when getting the sample, currently exeeds gpu memory
+        # if self.oba_generator is not None and random.random() < self.p_aug:
+        #     img, mask = self.oba_generator.generate_augmented_sample()
 
         img = np.nan_to_num(img, 0.0)
         img_t = torch.from_numpy(img).float()

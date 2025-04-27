@@ -1,4 +1,4 @@
-from OBA.object_based_augmentation import create_OBA_dataset, create_save_OBA_images
+from OBA.object_based_augmentation import create_save_OBA_images
 from utils.evaluation import run_evaluation
 from train.train import train
 from train.loader import get_loader, get_dataset
@@ -38,7 +38,7 @@ def main(model_selection=False, subset=False):
     loss_fn = nn.CrossEntropyLoss(ignore_index=0)
     n_epochs = 30
     batch_size = 8
-    MODEL_PATH = "models/UNet_normal_paramset_0.001_0.01_0.9.pth"
+    MODEL_PATH = None#"models/UNet_normal_paramset_0.001_0.01_0.9.pth"
 
     if subset:
         image_path = IMAGES_SUBSET_PATH
