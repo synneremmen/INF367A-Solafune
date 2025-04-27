@@ -1,4 +1,4 @@
-# SatMAE++ Implementation
+# SatMAE++ Individual Implementation
 
 ## Overview
 
